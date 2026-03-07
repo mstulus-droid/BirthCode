@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#FAF7F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Temukan profil kosmik dari tanggal lahirmu">
+<title>BirthCode — Profil Kosmikmu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --surface: #FFFFFF;
+    --text: #1A1714;
+    --muted: #8A8480;
+    --border: #EDE9E3;
+    --accent1: #C4785A;
+    --accent2: #6B8F71;
+    --accent3: #7B6EA6;
+    --accent4: #C4A85A;
+    --accent5: #5A8FA6;
+    --shadow: 0 2px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.09);
+    --radius: 20px;
+    --sidebar-w: 340px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LANG SWITCH ── */
+  .lang-switch {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    z-index: 100;
+    display: flex;
+    gap: 6px;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+  .lang-btn {
+    border: none;
+    background: transparent;
+    width: 34px; height: 34px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .lang-btn.active { background: var(--text); color: #fff; }
+
+  /* LOADING OVERLAY (same pattern as gemini) */
+  #loading-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  #loading-overlay.visible { opacity: 1; visibility: visible; }
+  .loading-star { font-size: 40px; color: var(--accent1); animation: spin 2s linear infinite; margin-bottom: 20px; }
+  .loading-text { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-style: italic; color: var(--text); }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+
+  /* ══════════════════════════════
+     MOBILE LAYOUT (default)
+  ══════════════════════════════ */
+
+  .mobile-wrapper { display: block; }
+  .desktop-wrapper { display: none; }
+
+  /* ── MOBILE HEADER ── */
+  .header {
+    text-align: center;
+    padding: 56px 24px 40px;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .header-eyebrow a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .header-eyebrow a:hover { color: var(--text); }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  .header h1 em { font-style: italic; color: var(--accent1); }
+  .header p { margin-top: 14px; color: var(--muted); font-weight: 300; font-size: 14px; }
+
+  .input-section { padding: 0 20px 40px; max-width: 440px; margin: 0 auto; }
+  .input-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .input-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted);
+    display: block; margin-bottom: 10px;
+  }
+  .date-input {
+    width: 100%; padding: 14px 18px;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 18px;
+    color: var(--text); background: var(--bg); outline: none;
+    transition: border-color 0.2s; -webkit-appearance: none; appearance: none;
+  }
+  .date-input:focus { border-color: var(--accent1); }
+  .wheel-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .wheel-column {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .wheel-column select {
+    width: 100%;
+    height: 132px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    text-align: center;
+    padding: 6px 0;
+  }
+  .wheel-column select option {
+    padding: 7px 8px;
+  }
+  .date-input::-webkit-calendar-picker-indicator,
+  .desk-date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 6px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(196,120,90,0.18), rgba(123,110,166,0.16));
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .date-input::-webkit-calendar-picker-indicator:hover,
+  .desk-date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  .date-input::-webkit-datetime-edit,
+  .desk-date-input::-webkit-datetime-edit {
+    color: var(--text);
+    letter-spacing: 0.3px;
+  }
+  .cta-btn {
+    width: 100%; margin-top: 16px; padding: 16px;
+    background: var(--text); color: white; border: none;
+    border-radius: 12px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+  }
+  .cta-btn:hover { background: #333; transform: translateY(-1px); }
+  .cta-btn:disabled,
+  .desk-cta:disabled {
+    opacity: 0.72;
+    cursor: wait;
+    transform: none;
+  }
+
+  .result-section { display: none; max-width: 440px; margin: 0 auto; padding: 0 20px 60px; }
+  .result-section.visible { display: block; }
+  #m-capture-area { background: var(--bg); padding: 20px; border-radius: var(--radius); margin-bottom: 12px; }
+
+  .born-headline { text-align: center; margin-bottom: 28px; padding: 24px 0 8px; }
+  .born-date-label { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 300; color: var(--muted); font-style: italic; }
+  .born-date { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; color: var(--text); margin-top: 4px; }
+
+  .cards-grid { display: flex; flex-direction: column; gap: 14px; }
+  #m-cardsGrid .card-age { order: 1; }
+  #m-cardsGrid .card-weton { order: 2; }
+  #m-cardsGrid .card-zodiac { order: 3; }
+  #m-cardsGrid .card-generation { order: 4; }
+  #m-cardsGrid .card-numerology { order: 5; }
+  #m-cardsGrid .card-fengshui { order: 6; }
+  #m-cardsGrid .card-moon { order: 7; }
+  #m-cardsGrid .card-birth { order: 8; }
+  #m-cardsGrid .card-lucky { order: 9; }
+
+  /* action row mobile */
+  .action-row {
+    display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+  }
+  .action-btn {
+    flex: 1 1 calc(50% - 5px); padding: 14px; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px;
+    border: 1.5px solid var(--border); background: var(--surface); color: var(--text);
+  }
+  .action-row .action-btn.primary { flex-basis: 100%; }
+  .action-btn:hover { background: var(--bg); }
+  .action-btn.primary { background: var(--text); color: white; border-color: var(--text); }
+  .action-btn.primary:hover { background: #333; }
+
+  .footer { text-align: center; padding: 20px 20px 40px; font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+
+  /* ══════════════════════════════
+     DESKTOP LAYOUT (≥900px)
+  ══════════════════════════════ */
+
+  @media (min-width: 900px) {
+    .mobile-wrapper { display: none !important; }
+    .desktop-wrapper { display: flex; min-height: 100vh; }
+
+    /* LEFT SIDEBAR */
+    .desk-sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 48px 32px 32px;
+      z-index: 10;
+    }
+    .desk-sidebar::-webkit-scrollbar { width: 0; }
+
+    .desk-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    .desk-logo-star {
+      font-size: 22px;
+      line-height: 1;
+    }
+    .desk-logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .desk-logo-text em { font-style: italic; color: var(--accent1); }
+
+    .desk-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px;
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+    .desk-tagline em { font-style: italic; color: var(--accent1); }
+
+    .desk-sub {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .desk-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 28px;
+    }
+
+    .desk-input-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 10px;
+    }
+    .desk-date-input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .desk-date-input:focus { border-color: var(--accent1); }
+    .desk-wheel { margin-bottom: 6px; }
+
+    .desk-cta {
+      width: 100%;
+      margin-top: 14px;
+      padding: 15px;
+      background: var(--text);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .desk-cta:hover { background: #2d2a27; transform: translateY(-1px); }
+
+    .desk-reset-link {
+      display: block;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    .desk-reset-link:hover { color: var(--text); }
+
+    .desk-sidebar-footer {
+      margin-top: auto;
+      padding-top: 28px;
+    }
+    .desk-sidebar-footer p {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      line-height: 1.7;
+    }
+
+    /* BORN DATE DISPLAY in sidebar */
+    .desk-born-display {
+      display: none;
+      margin-top: 28px;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .desk-born-display.visible { display: block; }
+    .desk-born-display .dbd-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .desk-born-display .dbd-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* RIGHT CONTENT AREA */
+    .desk-content {
+      flex: 1;
+      padding: 48px 40px 60px;
+      overflow-y: auto;
+    }
+
+    /* Desktop empty state */
+    .desk-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 120px);
+      text-align: center;
+      color: var(--muted);
+    }
+    .desk-empty-star {
+      font-size: 56px;
+      margin-bottom: 24px;
+      opacity: 0.35;
+      line-height: 1;
+    }
+    .desk-empty-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .desk-empty-sub {
+      font-size: 13px;
+      color: var(--border);
+      letter-spacing: 1px;
+    }
+
+    /* Desktop results */
+    .desk-results { display: none; }
+    .desk-results.visible { display: block; }
+    #d-capture-area { background: var(--bg); padding: 30px; border-radius: var(--radius); }
+
+    .desk-results-header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .desk-results-header .drh-left {}
+    .desk-results-header .drh-eyebrow {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .desk-results-header .drh-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 38px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .desk-share-btn {
+      padding: 11px 22px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .desk-share-btn:hover { background: var(--bg); }
+    .desk-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* Desktop cards grid — 2 columns */
+    .desk-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    #d-cardsGrid .card-age { order: 1; }
+    #d-cardsGrid .card-weton { order: 2; }
+    #d-cardsGrid .card-zodiac { order: 3; }
+    #d-cardsGrid .card-generation { order: 4; }
+    #d-cardsGrid .card-numerology { order: 5; }
+    #d-cardsGrid .card-fengshui { order: 6; }
+    #d-cardsGrid .card-moon { order: 7; }
+    #d-cardsGrid .card-birth { order: 8; }
+    #d-cardsGrid .card-lucky { order: 9; }
+
+    /* Span full width for certain cards */
+    .desk-cards-grid .card.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    :root { --sidebar-w: 380px; }
+    .desk-content { padding: 56px 56px 60px; }
+    .desk-cards-grid { gap: 18px; }
+  }
+
+  /* ══════════════════════════════
+     SHARED CARD STYLES
+  ══════════════════════════════ */
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.4s ease forwards;
+  }
+  .card:nth-child(1) { animation-delay: 0.04s; }
+  .card:nth-child(2) { animation-delay: 0.08s; }
+  .card:nth-child(3) { animation-delay: 0.12s; }
+  .card:nth-child(4) { animation-delay: 0.16s; }
+  .card:nth-child(5) { animation-delay: 0.20s; }
+  .card:nth-child(6) { animation-delay: 0.24s; }
+  .card:nth-child(7) { animation-delay: 0.28s; }
+  .card:nth-child(8) { animation-delay: 0.32s; }
+  .card:nth-child(9) { animation-delay: 0.36s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-category {
+    font-size: 10px; font-weight: 500; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 16px; display: flex; align-items: center;
+    justify-content: center; gap: 8px;
+  }
+  .card-icon { font-size: 36px; line-height: 1; margin-bottom: 10px; }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .card-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .card-desc { margin-top: 12px; font-size: 13px; color: var(--muted); font-weight: 300; line-height: 1.65; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; justify-content: center; }
+  .tag { padding: 4px 10px; border-radius: 100px; font-size: 11px; border: 1.5px solid var(--border); color: var(--text); background: var(--bg); }
+
+  .color-swatches { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; justify-content: center; }
+  .swatch { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); }
+  .swatch-dot { width: 26px; height: 26px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.12); flex-shrink: 0; }
+
+  .lucky-numbers { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+  .lucky-num {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--bg); border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600;
+  }
+
+  .lifepath-circle {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: var(--text); color: white;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+  }
+  .lifepath-circle .lp-num { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; line-height: 1; }
+  .lifepath-circle .lp-label { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; margin-top: 2px; }
+
+  .weton-box { display: flex; gap: 14px; align-items: stretch; margin-top: 4px; }
+  .weton-item { flex: 1; background: var(--bg); border-radius: 12px; padding: 14px 12px; text-align: center; }
+  .weton-item .wi-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .weton-item .wi-val { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; }
+  .weton-item .wi-num { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .neptu-total { margin-top: 14px; padding: 12px 16px; background: var(--bg); border-radius: 10px; display: flex; justify-content: center; gap: 12px; align-items: center; }
+  .neptu-total .nt-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .neptu-total .nt-val { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; }
+
+  .divider { height: 1px; background: var(--border); margin: 4px 0 14px; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="loading-overlay">
+  <div class="loading-star">✦</div>
+  <div class="loading-text" id="loadingText">Membaca garis semestamu...</div>
+</div>
+
+<div class="lang-switch">
+  <button class="lang-btn active" id="btn-id" onclick="setLanguage('id')">ID</button>
+  <button class="lang-btn" id="btn-en" onclick="setLanguage('en')">EN</button>
+</div>
+
+<!-- ═══════ MOBILE WRAPPER ═══════ -->
+<div class="mobile-wrapper">
+  <div class="header">
+    <div class="header-eyebrow" id="m-headerEyebrow"><a href="https://rhadzor.id" target="_blank" rel="noopener noreferrer">✦ RHADZOR.ID</a></div>
+    <h1>Birth<br><em>Code</em></h1>
+    <p id="m-headerDesc">Masukkan tanggal lahirmu dan temukan<br>semesta di balik harimu</p>
+  </div>
+
+  <div class="input-section">
+    <div class="input-card">
+      <label class="input-label" id="m-birthLabel" for="m-dayWheel">Tanggal Lahir</label>
+      <div class="wheel-picker">
+        <div class="wheel-column">
+          <select id="m-dayWheel" size="5" aria-label="Tanggal"></select>
+        </div>
+        <div class="wheel-column">
+          <select id="m-monthWheel" size="5" aria-label="Bulan"></select>
+        </div>
+        <div class="wheel-column">
+          <select id="m-yearWheel" size="5" aria-label="Tahun"></select>
+        </div>
+      </div>
+      <input type="hidden" id="m-birthdate">
+      <button class="cta-btn" id="m-generateBtn" onclick="handleGenerateClick('mobile')">Lihat Profil Saya →</button>
+    </div>
+  </div>
+
+  <div class="result-section" id="m-resultSection">
+    <div id="m-capture-area">
+      <div class="born-headline">
+        <div class="born-date-label" id="m-bornDateLabel">Kamu lahir pada</div>
+        <div class="born-date" id="m-bornDateDisplay"></div>
+      </div>
+      <div class="cards-grid" id="m-cardsGrid"></div>
+    </div>
+    <div class="action-row">
+      <button class="action-btn" id="m-resetBtn" onclick="resetMobile()">← Coba Lagi</button>
+      <button class="action-btn primary" id="m-shareBtn" onclick="shareResult()">Bagikan ✦</button>
+      <button class="action-btn" id="m-downloadBtn" onclick="downloadImage('m-capture-area')">Download Gambar</button>
+    </div>
+  </div>
+
+  <div class="footer" id="m-footerText">✦ dibaca dari langit, ditujukan untuk perjalananmu</div>
+</div>
+
+<!-- ═══════ DESKTOP WRAPPER ═══════ -->
+<div class="desktop-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="desk-sidebar">
+    <div class="desk-logo">
+      <span class="desk-logo-star">✦</span>
+      <div class="desk-logo-text">Birth<em>Code</em></div>
+    </div>
+
+    <div class="desk-tagline" id="d-tagline">Temukan semesta<br>di balik <em>hari lahirmu</em></div>
+    <div class="desk-sub" id="d-sub">Profil kosmik dari tanggal lahirmu — zodiak, numerologi, weton Jawa, shio, fase bulan, dan lebih banyak lagi.</div>
+
+    <div class="desk-divider"></div>
+
+    <label class="desk-input-label" id="d-birthLabel" for="d-dayWheel">Tanggal Lahir</label>
+    <div class="wheel-picker desk-wheel">
+      <div class="wheel-column">
+        <select id="d-dayWheel" size="5" aria-label="Tanggal"></select>
+      </div>
+      <div class="wheel-column">
+        <select id="d-monthWheel" size="5" aria-label="Bulan"></select>
+      </div>
+      <div class="wheel-column">
+        <select id="d-yearWheel" size="5" aria-label="Tahun"></select>
+      </div>
+    </div>
+    <input type="hidden" id="d-birthdate">
+    <button class="desk-cta" id="d-generateBtn" onclick="handleGenerateClick('desktop')">Lihat Profil →</button>
+    <a class="desk-reset-link" id="d-resetBtn" onclick="resetDesktop()" style="display:none">← Coba tanggal lain</a>
+
+    <!-- Born date chip -->
+    <div class="desk-born-display" id="d-bornDisplay">
+      <div class="dbd-label" id="d-bornLabel">Kamu lahir pada</div>
+      <div class="dbd-date" id="d-bornDate"></div>
+    </div>
+
+    <div class="desk-sidebar-footer">
+      <p id="d-footerText">✦ dibaca dari langit<br>ditujukan untuk perjalananmu</p>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="desk-content">
+    <!-- Empty state -->
+    <div class="desk-empty" id="d-emptyState">
+      <div class="desk-empty-star">✦</div>
+      <div class="desk-empty-title" id="d-emptyTitle">Siap mengungkap rahasiamu?</div>
+      <div class="desk-empty-sub" id="d-emptySub">MASUKKAN TANGGAL LAHIR DI SEBELAH KIRI</div>
+    </div>
+
+    <!-- Results -->
+    <div class="desk-results" id="d-results">
+      <div id="d-capture-area">
+        <div class="desk-results-header">
+          <div class="drh-left">
+            <div class="drh-eyebrow" id="d-resultsEyebrow">BirthCode</div>
+            <div class="drh-date" id="d-resultsDate"></div>
+          </div>
+          <div class="desk-actions">
+            <button class="desk-share-btn" id="d-shareBtn" onclick="shareResult()">Bagikan ✦</button>
+            <button class="desk-share-btn" id="d-downloadBtn" onclick="downloadImage('d-capture-area')">Download Gambar</button>
+          </div>
+        </div>
+        <div class="desk-cards-grid" id="d-cardsGrid"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+// ═══════════════════════════════════════
+// DATA (same as original)
+// ═══════════════════════════════════════
+
+const ZODIAC = [
+  { name: 'Capricorn', icon: '♑', date: 'Des 22 – Jan 19', element: 'Bumi', traits: ['Ambisius','Disiplin','Sabar','Praktis'], desc: 'Capricorn adalah jiwa yang tekun dan bertujuan. Kamu membangun sesuatu yang bertahan lama, perlahan tapi pasti.' },
+  { name: 'Aquarius', icon: '♒', date: 'Jan 20 – Feb 18', element: 'Udara', traits: ['Inovatif','Bebas','Humanis','Visioner'], desc: 'Aquarius adalah pemikir maju yang melihat dunia berbeda dari yang lain. Kamu hadir untuk mengubah cara orang berpikir.' },
+  { name: 'Pisces', icon: '♓', date: 'Feb 19 – Mar 20', element: 'Air', traits: ['Empatik','Kreatif','Intuitif','Penuh Kasih'], desc: 'Pisces merasakan dunia lebih dalam dari siapa pun. Imajinasimu adalah rumah, dan kelembutanmu adalah kekuatan.' },
+  { name: 'Aries', icon: '♈', date: 'Mar 21 – Apr 19', element: 'Api', traits: ['Berani','Energik','Spontan','Pemimpin'], desc: 'Aries adalah jiwa pertama—penuh api dan keberanian. Kamu terlahir untuk memulai hal-hal besar.' },
+  { name: 'Taurus', icon: '♉', date: 'Apr 20 – Mei 20', element: 'Bumi', traits: ['Loyal','Sabar','Andal','Sensualis'], desc: 'Taurus adalah jiwa yang stabil dan tahu cara menikmati hidup. Kamu membangun kenyamanan dan keindahan di sekitarmu.' },
+  { name: 'Gemini', icon: '♊', date: 'Mei 21 – Jun 20', element: 'Udara', traits: ['Cerdas','Adaptif','Komunikatif','Penasaran'], desc: 'Gemini adalah pikiran yang tak pernah berhenti. Kamu bisa memahami dua sisi dari segalanya dengan mudah.' },
+  { name: 'Cancer', icon: '♋', date: 'Jun 21 – Jul 22', element: 'Air', traits: ['Intuitif','Pelindung','Penuh Cinta','Sensitif'], desc: 'Cancer adalah jantung dari setiap komunitas. Kamu merasakan segalanya dalam-dalam dan merawat orang-orang tercintamu.' },
+  { name: 'Leo', icon: '♌', date: 'Jul 23 – Ags 22', element: 'Api', traits: ['Percaya Diri','Murah Hati','Hangat','Karismatik'], desc: 'Leo adalah sinar matahari yang berjalan. Kamu lahir untuk bersinar dan memberi cahaya bagi orang di sekitarmu.' },
+  { name: 'Virgo', icon: '♍', date: 'Ags 23 – Sep 22', element: 'Bumi', traits: ['Analitis','Teliti','Membantu','Terpercaya'], desc: 'Virgo melihat detail yang luput dari yang lain. Kamu adalah problem solver yang tidak pernah berhenti memperbaiki diri.' },
+  { name: 'Libra', icon: '♎', date: 'Sep 23 – Okt 22', element: 'Udara', traits: ['Adil','Penuh Gaya','Diplomatik','Harmonis'], desc: 'Libra adalah pencari keseimbangan dan keindahan. Kamu memiliki karunia untuk melihat semua perspektif dengan adil.' },
+  { name: 'Scorpio', icon: '♏', date: 'Okt 23 – Nov 21', element: 'Air', traits: ['Intens','Misteri','Setia','Transformatif'], desc: 'Scorpio menyelam ke kedalaman yang tidak berani dijamah orang lain. Kamu adalah jiwa yang mengalami perubahan dan kelahiran kembali.' },
+  { name: 'Sagittarius', icon: '♐', date: 'Nov 22 – Des 21', element: 'Api', traits: ['Optimis','Jujur','Petualang','Filosofis'], desc: 'Sagittarius adalah panah yang selalu mengarah ke cakrawala baru. Kamu haus akan petualangan, kebebasan, dan kebijaksanaan.' },
+];
+
+const SHIO = [
+  { name: 'Tikus', icon: '🐭', traits: ['Cerdik','Adaptif','Charming'], desc: 'Penuh energi dan ide kreatif. Pandai menemukan peluang.' },
+  { name: 'Kerbau', icon: '🐮', traits: ['Gigih','Jujur','Pekerja Keras'], desc: 'Teguh dan terpercaya. Sukses lewat ketekunan.' },
+  { name: 'Macan', icon: '🐯', traits: ['Berani','Kompetitif','Karismatik'], desc: 'Pemimpin alami yang berani menghadapi tantangan.' },
+  { name: 'Kelinci', icon: '🐰', traits: ['Anggun','Hati-hati','Ramah'], desc: 'Penuh kedamaian dan selera tinggi. Pandai bernegosiasi.' },
+  { name: 'Naga', icon: '🐲', traits: ['Kuat','Karismatik','Ambisius'], desc: 'Simbol keberuntungan. Penuh vitalitas dan kepercayaan diri.' },
+  { name: 'Ular', icon: '🐍', traits: ['Bijak','Intuitif','Misterius'], desc: 'Pemikir mendalam dengan intuisi tajam.' },
+  { name: 'Kuda', icon: '🐴', traits: ['Energik','Bebas','Enthusiast'], desc: 'Jiwa bebas yang penuh semangat dan keceriaan.' },
+  { name: 'Kambing', icon: '🐐', traits: ['Kreatif','Lembut','Artistik'], desc: 'Jiwa seni yang tenang dan penuh kasih.' },
+  { name: 'Monyet', icon: '🐒', traits: ['Cerdas','Jenaka','Lincah'], desc: 'Penuh kecerdasan dan selalu punya cara untuk keluar dari masalah.' },
+  { name: 'Ayam', icon: '🐓', traits: ['Pekerja Keras','Teliti','Percaya Diri'], desc: 'Selalu siap dan terorganisir. Perfeksionis sejati.' },
+  { name: 'Anjing', icon: '🐶', traits: ['Loyal','Jujur','Melindungi'], desc: 'Sahabat setia yang selalu ada. Penuh keberanian moral.' },
+  { name: 'Babi', icon: '🐷', traits: ['Murah Hati','Bersemangat','Sincere'], desc: 'Hati yang murni dan penuh kebaikan.' },
+];
+
+const ELEMEN_CHINA = [
+  { name: 'Logam', icon: '⚙️', desc: 'Ketepatan, kekuatan, dan determinasi. Kamu memiliki standar tinggi dan fokus tak tergoyahkan.' },
+  { name: 'Air', icon: '💧', desc: 'Kebijaksanaan, fleksibilitas, dan komunikasi. Kamu mengalir menuju tujuan dengan cara yang cerdas.' },
+  { name: 'Kayu', icon: '🌿', desc: 'Pertumbuhan, kreativitas, dan kemurahan hati. Kamu berkembang dan membawa kehidupan bagi sekitar.' },
+  { name: 'Api', icon: '🔥', desc: 'Hasrat, kepemimpinan, dan antusiasme. Kamu memberi energi dan inspirasi bagi orang-orang di sekitarmu.' },
+  { name: 'Tanah', icon: '🌍', desc: 'Stabilitas, kepercayaan, dan kejujuran. Kamu adalah fondasi yang bisa diandalkan semua orang.' },
+];
+
+const BIRTHSTONE = [
+  { month: 'Januari', stone: 'Garnet', icon: '💎', color: '#B5103C', colorName: 'Merah Tua', desc: 'Melambangkan kesetiaan, kejujuran, dan cinta abadi.' },
+  { month: 'Februari', stone: 'Amethyst', icon: '🔮', color: '#9B59B6', colorName: 'Ungu', desc: 'Melambangkan kedamaian, keseimbangan, dan intuisi.' },
+  { month: 'Maret', stone: 'Aquamarine', icon: '💠', color: '#1ABC9C', colorName: 'Biru Laut', desc: 'Melambangkan keberanian, kejernihan, dan komunikasi.' },
+  { month: 'April', stone: 'Diamond', icon: '💍', color: '#E8F4FD', colorName: 'Putih Kristal', desc: 'Melambangkan kekuatan, kemurnian, dan abadi.' },
+  { month: 'Mei', stone: 'Emerald', icon: '🟢', color: '#27AE60', colorName: 'Zamrud', desc: 'Melambangkan kesuburan, kebijaksanaan, dan pertumbuhan.' },
+  { month: 'Juni', stone: 'Pearl', icon: '🫧', color: '#F4F4F2', colorName: 'Putih Mutiara', desc: 'Melambangkan kemurnian, keanggunan, dan kesempurnaan.' },
+  { month: 'Juli', stone: 'Ruby', icon: '❤️', color: '#E91E63', colorName: 'Merah Ruby', desc: 'Melambangkan semangat, vitalitas, dan keberanian.' },
+  { month: 'Agustus', stone: 'Peridot', icon: '🌿', color: '#8BC34A', colorName: 'Hijau Limau', desc: 'Melambangkan kekuatan, penyembuhan, dan cahaya.' },
+  { month: 'September', stone: 'Sapphire', icon: '🔵', color: '#2196F3', colorName: 'Biru Safir', desc: 'Melambangkan kebijaksanaan, kesetiaan, dan kepercayaan.' },
+  { month: 'Oktober', stone: 'Opal', icon: '✨', color: '#FF9800', colorName: 'Opalescent', desc: 'Melambangkan kreativitas, harapan, dan keajaiban.' },
+  { month: 'November', stone: 'Topaz', icon: '🟡', color: '#FFC107', colorName: 'Kuning Emas', desc: 'Melambangkan keceriaan, keberuntungan, dan keramahan.' },
+  { month: 'Desember', stone: 'Turquoise', icon: '🩵', color: '#00BCD4', colorName: 'Biru Pirus', desc: 'Melambangkan perlindungan, persahabatan, dan keberuntungan.' },
+];
+
+const BIRTH_FLOWER = [
+  { month: 'Januari', flower: 'Carnation & Snowdrop', icon: '🌸', desc: 'Carnation melambangkan cinta dan kekaguman; Snowdrop melambangkan harapan dan keindahan.' },
+  { month: 'Februari', flower: 'Violet & Primrose', icon: '💜', desc: 'Violet melambangkan kesetiaan dan cinta tulus; Primrose melambangkan cinta muda.' },
+  { month: 'Maret', flower: 'Daffodil', icon: '🌼', desc: 'Daffodil melambangkan kelahiran baru, inspirasi, dan awal yang cerah.' },
+  { month: 'April', flower: 'Daisy & Sweet Pea', icon: '🌻', desc: 'Daisy melambangkan kemurnian dan kegembiraan; Sweet Pea melambangkan kesenangan.' },
+  { month: 'Mei', flower: 'Lily of the Valley', icon: '🌺', desc: 'Melambangkan kebahagiaan, kerendahan hati, dan kembalinya cinta.' },
+  { month: 'Juni', flower: 'Rose & Honeysuckle', icon: '🌹', desc: 'Rose melambangkan cinta sejati; Honeysuckle melambangkan ikatan yang kuat.' },
+  { month: 'Juli', flower: 'Larkspur & Water Lily', icon: '💐', desc: 'Larkspur melambangkan keceriaan dan keindahan; Water Lily melambangkan pencerahan.' },
+  { month: 'Agustus', flower: 'Gladiolus & Poppy', icon: '🌷', desc: 'Gladiolus melambangkan kekuatan karakter; Poppy melambangkan imajinasi.' },
+  { month: 'September', flower: 'Aster & Morning Glory', icon: '🌾', desc: 'Aster melambangkan cinta dan kebijaksanaan; Morning Glory melambangkan semangat.' },
+  { month: 'Oktober', flower: 'Marigold & Cosmos', icon: '🌻', desc: 'Marigold melambangkan kreativitas dan kehangatan; Cosmos melambangkan ketertiban.' },
+  { month: 'November', flower: 'Chrysanthemum', icon: '🌼', desc: 'Melambangkan keoptimisan, kesenangan, dan persahabatan yang panjang.' },
+  { month: 'Desember', flower: 'Holly & Narcissus', icon: '🌿', desc: 'Holly melambangkan perlindungan dan keberuntungan; Narcissus melambangkan harapan.' },
+];
+
+const LUCKY_COLORS = {
+  1:[{name:'Merah',hex:'#E74C3C'},{name:'Emas',hex:'#F39C12'},{name:'Oranye',hex:'#E67E22'}],
+  2:[{name:'Oranye',hex:'#E67E22'},{name:'Kuning',hex:'#F1C40F'},{name:'Krem',hex:'#FFF8DC'}],
+  3:[{name:'Kuning',hex:'#F1C40F'},{name:'Ungu',hex:'#9B59B6'},{name:'Biru Muda',hex:'#3498DB'}],
+  4:[{name:'Biru',hex:'#2980B9'},{name:'Abu-abu',hex:'#95A5A6'},{name:'Hijau',hex:'#27AE60'}],
+  5:[{name:'Biru Turquoise',hex:'#1ABC9C'},{name:'Merah Muda',hex:'#E91E63'},{name:'Perak',hex:'#BDC3C7'}],
+  6:[{name:'Hijau',hex:'#27AE60'},{name:'Biru',hex:'#2980B9'},{name:'Merah Muda',hex:'#E91E63'}],
+  7:[{name:'Ungu',hex:'#8E44AD'},{name:'Merah',hex:'#C0392B'},{name:'Putih',hex:'#ECF0F1'}],
+  8:[{name:'Merah',hex:'#E74C3C'},{name:'Cokelat',hex:'#795548'},{name:'Emas',hex:'#F39C12'}],
+  9:[{name:'Merah',hex:'#C0392B'},{name:'Oranye',hex:'#E67E22'},{name:'Kuning',hex:'#F1C40F'}],
+  11:[{name:'Perak',hex:'#BDC3C7'},{name:'Putih',hex:'#ECF0F1'},{name:'Ungu',hex:'#9B59B6'}],
+  22:[{name:'Emas',hex:'#F39C12'},{name:'Merah',hex:'#E74C3C'},{name:'Cokelat',hex:'#795548'}],
+  33:[{name:'Biru',hex:'#2980B9'},{name:'Putih',hex:'#ECF0F1'},{name:'Hijau',hex:'#27AE60'}],
+};
+
+const NUMEROLOGI_DATA = {
+  1:{title:'Sang Pemimpin',desc:'Kamu adalah pioner dan inovator. Independen, penuh tekad, dan lahir untuk memimpin jalan.'},
+  2:{title:'Sang Diplomat',desc:'Kamu adalah jiwa yang harmonis dan penuh empati. Kamu terbaik saat berkolaborasi dan menciptakan kedamaian.'},
+  3:{title:'Sang Kreator',desc:'Ekspresif, kreatif, dan penuh cahaya. Kamu membawa kegembiraan lewat seni, kata-kata, dan koneksi sosial.'},
+  4:{title:'Sang Pembangun',desc:'Kamu adalah fondasi yang kuat. Disiplin, tekun, dan membangun sesuatu yang bertahan lewat kerja keras.'},
+  5:{title:'Sang Petualang',desc:'Jiwa bebas yang penuh semangat akan pengalaman baru. Kamu terus bergerak, belajar, dan berkembang.'},
+  6:{title:'Sang Penyayang',desc:'Penuh kasih dan rasa tanggung jawab. Kamu hadir untuk merawat, menyembuhkan, dan menyeimbangkan kehidupan.'},
+  7:{title:'Sang Pencari',desc:'Pikiran analitis yang mendalam dan spiritual. Kamu mencari kebenaran dan kebijaksanaan di balik permukaan.'},
+  8:{title:'Sang Pelaksana',desc:'Ambisius, berorientasi hasil, dan penuh kepercayaan diri. Kamu hadir untuk mencapai kesuksesan dan memberi dampak besar.'},
+  9:{title:'Sang Humanis',desc:'Jiwa luas yang penuh belas kasih. Kamu hadir untuk melayani kemanusiaan dan meninggalkan warisan kebijaksanaan.'},
+  11:{title:'Sang Penginspirasi',desc:'Angka master—intuisi luar biasa dan visi spiritual. Kamu lahir untuk menginspirasi dan menerangi orang lain.'},
+  22:{title:'Sang Arsitek',desc:'Angka master—kemampuan untuk membangun impian besar menjadi kenyataan. Visimu bisa mengubah dunia.'},
+  33:{title:'Sang Guru',desc:'Angka master—kasih sayang dan kebijaksanaan tertinggi. Kamu lahir untuk mengajar dan mengangkat jiwa manusia.'},
+};
+
+const HARI_JAWA=['Ahad','Senen','Seloso','Rebo','Kemis','Jemuwah','Setu'];
+const HARI_NEPTU=[5,4,3,7,8,6,9];
+const PASARAN=['Legi','Pahing','Pon','Wage','Kliwon'];
+const PASARAN_NEPTU=[5,9,7,4,8];
+const WETON_MAKNA={
+  5:'Jiwa penjelajah dan bebas.',6:'Jiwa yang penuh kasih dan merawat.',
+  7:'Jiwa yang bijaksana dan spiritual.',8:'Jiwa yang kreatif dan ekspresif.',
+  9:'Jiwa yang ramah dan berpengaruh.',10:'Jiwa yang teliti dan ambisius.',
+  11:'Jiwa yang pemimpin dan berkarisma.',12:'Jiwa yang sabar dan kuat.',
+  13:'Jiwa yang energik dan bersemangat.',14:'Jiwa yang mandiri dan percaya diri.',
+  15:'Jiwa yang dermawan dan berpengaruh.',16:'Jiwa yang intuitif dan kreatif.',
+  17:'Jiwa yang baik hati dan diplomatik.',18:'Jiwa yang penuh vitalitas.',
+};
+
+const GENERASI=[
+  {name:'Baby Boomers',icon:'👴',range:[1946,1964],traitsEn:'Hardworking, competitive, self-assured',traitsId:'Pekerja keras, kompetitif, percaya diri',descId:'Dibesarkan saat ekonomi bertumbuh; cenderung loyal pada karier, menghargai stabilitas, dan etos kerja kuat.',descEn:'Raised in a post-war boom; often career-loyal, stability-focused, and strongly work-ethic driven.'},
+  {name:'Generation X',icon:'🧑‍💼',range:[1965,1980],traitsEn:'Independent, adaptable, tech transition',traitsId:'Mandiri, adaptif, transisi teknologi',descId:'Generasi jembatan analog ke digital; pragmatis, mandiri, dan cepat beradaptasi pada perubahan.',descEn:'A bridge generation from analog to digital; pragmatic, independent, and quick to adapt.'},
+  {name:'Millennials',icon:'🧑‍💻',range:[1981,1996],traitsEn:'Digital natives, purpose-driven, collaborative',traitsId:'Native digital, berorientasi tujuan, kolaboratif',descId:'Akrab dengan internet sejak muda; menilai makna, kolaborasi, dan work-life balance sebagai prioritas.',descEn:'Grew up with the internet; values purpose, collaboration, and work-life balance.'},
+  {name:'Generation Z',icon:'🧑‍🎤',range:[1997,2012],traitsEn:'True digital natives, diverse, pragmatic',traitsId:'Digital native sejati, beragam, pragmatis',descId:'Lahir di era media sosial; cepat belajar, inklusif, realistis, dan sadar isu sosial/global.',descEn:'Born into social platforms; fast-learning, inclusive, pragmatic, and socially aware.'},
+  {name:'Generation Alpha',icon:'👶',range:[2013,2024],traitsEn:'Tech immersed, global, climate conscious',traitsId:'Sangat akrab teknologi, global, sadar iklim',descId:'Generasi dengan paparan teknologi paling awal; berpikir global, visual, dan peduli keberlanjutan.',descEn:'Most early-tech-exposed generation; globally minded, visual-first, and climate-aware.'},
+];
+
+const DAY_POEMS={
+  0:{dayEn:'Sunday',dayId:'Minggu',poemEn:'Born on the Sabbath — fair, wise, good, and full of joy.',poemId:'Anak yang lahir di hari Minggu dikenal elok, bijak, baik hati, dan ceria.'},
+  1:{dayEn:'Monday',dayId:'Senin',poemEn:"Monday's child is fair of face.",poemId:'Anak hari Senin berwajah menawan.'},
+  2:{dayEn:'Tuesday',dayId:'Selasa',poemEn:"Tuesday's child is full of grace.",poemId:'Anak hari Selasa penuh anggun dan berkelas.'},
+  3:{dayEn:'Wednesday',dayId:'Rabu',poemEn:"Wednesday's child is full of woe.",poemId:'Anak hari Rabu dikenal penuh pergulatan rasa.'},
+  4:{dayEn:'Thursday',dayId:'Kamis',poemEn:"Thursday's child has far to go.",poemId:'Anak hari Kamis punya perjalanan panjang untuk ditempuh.'},
+  5:{dayEn:'Friday',dayId:'Jumat',poemEn:"Friday's child is loving and giving.",poemId:'Anak hari Jumat penyayang dan suka memberi.'},
+  6:{dayEn:'Saturday',dayId:'Sabtu',poemEn:"Saturday's child works hard for a living.",poemId:'Anak hari Sabtu bekerja keras demi hidupnya.'},
+};
+
+let currentLang='id';
+
+const I18N={
+  id:{
+    title:'BirthCode',desc:'Masukkan tanggal lahirmu dan temukan<br>kode semesta di balik harimu',
+    birthLabel:'Tanggal Lahir',generateBtn:'Lihat Profil Saya →',bornDateLabel:'Kamu lahir pada',
+    resetBtn:'← Coba Tanggal Lain',shareBtn:'Bagikan ✦',footer:'✦ dibaca dari langit, ditujukan untuk perjalananmu',
+    downloadBtn:'Download Gambar',
+    loading:'Membaca garis semestamu...',
+    downloadingImage:'Menyiapkan gambarmu...',
+    futureDate:'Wah, kamu belum lahir dari bintang-bintang! Masukkan tanggal lahir di masa lalu ya. ✨',
+    invalidDate:'Format tanggal belum valid. Coba pilih ulang dari kalender.',
+    imageError:'Maaf, gambar belum bisa dibuat sekarang. Coba lagi sebentar.',
+    noDate:'Masukkan tanggal lahir dulu ya!',sharedCopied:'Teks berhasil disalin! ✓',
+    shareText:'Aku cek hasil BirthCode-ku ✨ — dari zodiak, weton Jawa, numerologi, sampai batu lahirku! Coba cek punyamu juga 🌙',
+    shareTitle:'Hasil BirthCode-ku',
+    tagline:'Temukan semesta<br>di balik <em>hari lahirmu</em>',
+    subDesc:'Profil kosmik dari tanggal lahirmu — zodiak, numerologi, weton Jawa, shio, fase bulan, dan lebih banyak lagi.',
+    emptyTitle:'Siap mengungkap rahasiamu?',emptySub:'MASUKKAN TANGGAL LAHIR DI SEBELAH KIRI',
+    resetLink:'← Coba tanggal lain',
+    categories:{age:'Usia Saat Ini',generation:'Generasi',zodiac:'Zodiak Barat',fengshui:'Fengshui',moonDay:'Fase Bulan & Hari Lahir',weton:'Weton Jawa',numerology:'Numerologi',birth:'Batu & Bunga Lahir',lucky:'Angka & Warna Keberuntungan'},
+    labels:{birthdayCountdown:(n,m,d)=>`Ulang tahun ke-${n} dalam ${m} bulan ${d} hari lagi.`,age:(y,m,d)=>`${y} tahun ${m} bulan ${d} hari`,moonAtBirth:'Fase bulan saat lahir',dayOfBirth:'Hari kelahiran',day:'Hari',market:'Pasaran',wetonTotal:'Total Neptu Weton',lifePath:'Life Path',year:'Tahun',fiveElements:'Lima Elemen',stone:'Batu',flower:'Bunga',luckyNumber:'Angka Keberuntungan',luckyColor:'Warna Keberuntungan',zodiacElement:'Elemen'}
+  },
+  en:{
+    title:'BirthCode',desc:'Enter your birth date and discover<br>the cosmic code behind your day',
+    birthLabel:'Birth Date',generateBtn:'See My Profile →',bornDateLabel:'You were born on',
+    resetBtn:'← Try Another Date',shareBtn:'Share ✦',footer:'✦ read from the sky, meant for your journey',
+    downloadBtn:'Download Image',
+    loading:'Reading your cosmic path...',
+    downloadingImage:'Preparing your image...',
+    futureDate:'Whoa, you haven\'t fallen from the stars yet! Please enter a past date. ✨',
+    invalidDate:'The date format is invalid. Please pick the date again.',
+    imageError:'Unable to create image right now. Please try again.',
+    noDate:'Please enter your birth date first!',sharedCopied:'Text copied successfully! ✓',
+    shareText:'I checked my BirthCode result ✨ — zodiac, Javanese weton, numerology, and birthstone. Try yours too 🌙',
+    shareTitle:'My BirthCode Result',
+    tagline:'Discover the universe<br>behind your <em>birth date</em>',
+    subDesc:'Your cosmic profile from your birth date — zodiac, numerology, Javanese weton, shio, moon phase, and much more.',
+    emptyTitle:'Ready to reveal your secrets?',emptySub:'ENTER YOUR BIRTH DATE ON THE LEFT',
+    resetLink:'← Try another date',
+    categories:{age:'Current Age',generation:'Generation',zodiac:'Western Zodiac',fengshui:'Fengshui',moonDay:'Moon Phase & Day of Birth',weton:'Javanese Weton',numerology:'Numerology',birth:'Birthstone & Birth Flower',lucky:'Lucky Numbers & Colors'},
+    labels:{birthdayCountdown:(n,m,d)=>`Your ${n}th birthday is in ${m} months ${d} days.`,age:(y,m,d)=>`${y} years ${m} months ${d} days`,moonAtBirth:'Moon phase at birth',dayOfBirth:'Day of birth',day:'Day',market:'Market Day',wetonTotal:'Total Weton Neptu',lifePath:'Life Path',year:'Year',fiveElements:'Five Elements',stone:'Stone',flower:'Flower',luckyNumber:'Lucky Numbers',luckyColor:'Lucky Colors',zodiacElement:'Element'}
+  }
+};
+
+const NUMEROLOGY_EN={
+  1:{title:'The Leader',desc:'You are a pioneer with initiative and determination, built to lead change.'},
+  2:{title:'The Diplomat',desc:'You are empathetic and cooperative, creating harmony through collaboration.'},
+  3:{title:'The Creator',desc:'Expressive and imaginative, you bring joy through ideas and communication.'},
+  4:{title:'The Builder',desc:'Disciplined and reliable, you create lasting structures through hard work.'},
+  5:{title:'The Explorer',desc:'Freedom-loving and adaptable, you grow through new experiences.'},
+  6:{title:'The Nurturer',desc:'Caring and responsible, you naturally support and heal others.'},
+  7:{title:'The Seeker',desc:'Analytical and reflective, you search for truth beyond the surface.'},
+  8:{title:'The Achiever',desc:'Ambitious and execution-focused, you turn vision into tangible impact.'},
+  9:{title:'The Humanitarian',desc:'Compassionate and broad-minded, you are driven to serve a greater cause.'},
+  11:{title:'The Inspirer',desc:'A master number with strong intuition and visionary insight.'},
+  22:{title:'The Architect',desc:'A master builder with the ability to realize big, practical visions.'},
+  33:{title:'The Teacher',desc:'A master number of compassion and wisdom, uplifting others through guidance.'},
+};
+
+const ZODIAC_DESC_EN={Capricorn:'Capricorn is steady and goal-driven, building lasting results step by step.',Aquarius:'Aquarius sees the world differently and often inspires new ways of thinking.',Pisces:'Pisces is deeply intuitive and imaginative, with a gentle but strong emotional core.',Aries:'Aries is bold and initiating, naturally drawn to action and fresh starts.',Taurus:'Taurus is grounded and loyal, bringing comfort, beauty, and consistency.',Gemini:'Gemini is curious and expressive, quick to connect ideas and people.',Cancer:'Cancer is caring and protective, led by deep intuition and emotional intelligence.',Leo:'Leo radiates warmth and confidence, naturally uplifting people around them.',Virgo:'Virgo is detail-focused and practical, always refining and improving.',Libra:'Libra seeks balance and harmony, with strong social intelligence.',Scorpio:'Scorpio is intense and transformative, drawn to depth and truth.',Sagittarius:'Sagittarius is adventurous and optimistic, always aiming for wider horizons.'};
+
+const SHIO_DESC_EN={Tikus:'Quick-thinking and resourceful, with a strong instinct for opportunities.',Kerbau:'Steady, honest, and persistent, succeeding through consistency.',Macan:'Brave and charismatic, a natural challenger and leader.',Kelinci:'Diplomatic and graceful, with a calm and refined approach.',Naga:'Powerful and ambitious, often associated with fortune and vitality.',Ular:'Wise and intuitive, with deep and strategic thinking.',Kuda:'Energetic and freedom-loving, thriving in movement and change.',Kambing:'Gentle and artistic, with a warm and empathetic nature.',Monyet:'Smart and agile, creative in solving problems.',Ayam:'Disciplined and detail-oriented, confident and dependable.',Anjing:'Loyal and protective, guided by strong moral values.',Babi:'Generous and sincere, bringing kindness and optimism.'};
+
+const ELEMENT_DESC_EN={Logam:'Precision, strength, and determination with high standards.',Air:'Wisdom, flexibility, and communication that flows intelligently.',Kayu:'Growth, creativity, and generosity that nurture others.',Api:'Passion, leadership, and enthusiasm that energize people.',Tanah:'Stability, trust, and reliability as a strong foundation.'};
+
+const SHIO_NAME_EN={Tikus:'Rat',Kerbau:'Ox',Macan:'Tiger',Kelinci:'Rabbit',Naga:'Dragon',Ular:'Snake',Kuda:'Horse',Kambing:'Goat',Monyet:'Monkey',Ayam:'Rooster',Anjing:'Dog',Babi:'Pig'};
+const SHIO_TRAITS_EN={Tikus:['Clever','Adaptable','Charming'],Kerbau:['Persistent','Honest','Hardworking'],Macan:['Brave','Competitive','Charismatic'],Kelinci:['Graceful','Careful','Friendly'],Naga:['Strong','Charismatic','Ambitious'],Ular:['Wise','Intuitive','Mysterious'],Kuda:['Energetic','Free-spirited','Enthusiastic'],Kambing:['Creative','Gentle','Artistic'],Monyet:['Smart','Witty','Agile'],Ayam:['Hardworking','Detail-oriented','Confident'],Anjing:['Loyal','Honest','Protective'],Babi:['Generous','Passionate','Sincere']};
+
+const STONE_NAME_ID={Garnet:'Delima',Amethyst:'Kecubung',Aquamarine:'Akuamarin',Diamond:'Berlian',Emerald:'Zamrud',Pearl:'Mutiara',Ruby:'Rubi',Peridot:'Peridot',Sapphire:'Safir',Opal:'Opal',Topaz:'Topas',Turquoise:'Pirus'};
+const COLOR_NAME_EN={'Merah Tua':'Deep Red','Ungu':'Purple','Biru Laut':'Sea Blue','Putih Kristal':'Crystal White','Zamrud':'Emerald','Putih Mutiara':'Pearl White','Merah Ruby':'Ruby Red','Hijau Limau':'Lime Green','Biru Safir':'Sapphire Blue','Opalescent':'Opalescent','Kuning Emas':'Golden Yellow','Biru Pirus':'Turquoise Blue'};
+const STONE_DESC_EN={Januari:'Symbolizes loyalty, honesty, and enduring love.',Februari:'Symbolizes peace, balance, and intuition.',Maret:'Symbolizes courage, clarity, and communication.',April:'Symbolizes strength, purity, and eternity.',Mei:'Symbolizes growth, wisdom, and vitality.',Juni:'Symbolizes purity, elegance, and wholeness.',Juli:'Symbolizes passion, vitality, and courage.',Agustus:'Symbolizes healing, strength, and positive light.',September:'Symbolizes wisdom, loyalty, and trust.',Oktober:'Symbolizes creativity, hope, and wonder.',November:'Symbolizes joy, fortune, and warmth.',Desember:'Symbolizes protection, friendship, and good luck.'};
+const FLOWER_DESC_EN={Januari:'Carnation stands for love and admiration; Snowdrop stands for hope and grace.',Februari:'Violet stands for loyalty and sincere love; Primrose stands for young love.',Maret:'Daffodil stands for renewal, inspiration, and bright beginnings.',April:'Daisy stands for purity and joy; Sweet Pea stands for pleasure.',Mei:'Symbolizes happiness, humility, and the return of love.',Juni:'Rose stands for true love; Honeysuckle stands for devoted bonds.',Juli:'Larkspur stands for positivity; Water Lily stands for enlightenment.',Agustus:'Gladiolus stands for strength of character; Poppy stands for imagination.',September:'Aster stands for love and wisdom; Morning Glory stands for spirit.',Oktober:'Marigold stands for warmth and creativity; Cosmos stands for harmony.',November:'Symbolizes optimism, joy, and long-lasting friendship.',Desember:'Holly stands for protection and good fortune; Narcissus stands for hope.'};
+const FLOWER_NAME_EN={'Carnation & Snowdrop':'Carnation & Snowdrop','Violet & Primrose':'Violet & Primrose',Daffodil:'Daffodil','Daisy & Sweet Pea':'Daisy & Sweet Pea','Lily of the Valley':'Lily of the Valley','Rose & Honeysuckle':'Rose & Honeysuckle','Larkspur & Water Lily':'Larkspur & Water Lily','Gladiolus & Poppy':'Gladiolus & Poppy','Aster & Morning Glory':'Aster & Morning Glory','Marigold & Cosmos':'Marigold & Cosmos',Chrysanthemum:'Chrysanthemum','Holly & Narcissus':'Holly & Narcissus'};
+const FLOWER_NAME_ID={'Carnation & Snowdrop':'Anyelir & Snowdrop','Violet & Primrose':'Violet & Primrose',Daffodil:'Daffodil','Daisy & Sweet Pea':'Daisy & Sweet Pea','Lily of the Valley':'Lili Lembah','Rose & Honeysuckle':'Mawar & Honeysuckle','Larkspur & Water Lily':'Larkspur & Teratai','Gladiolus & Poppy':'Gladiol & Poppy','Aster & Morning Glory':'Aster & Morning Glory','Marigold & Cosmos':'Marigold & Cosmos',Chrysanthemum:'Krisan','Holly & Narcissus':'Holly & Narcissus'};
+
+// ═══════ CALC ═══════
+function getZodiac(month,day){
+  if(month===12&&day>=22)return ZODIAC[0];
+  if(month===1&&day<=19)return ZODIAC[0];
+  if(month===1&&day>=20)return ZODIAC[1];
+  if(month===2)return day<=18?ZODIAC[1]:ZODIAC[2];
+  if(month===3)return day<=20?ZODIAC[2]:ZODIAC[3];
+  if(month===4)return day<=19?ZODIAC[3]:ZODIAC[4];
+  if(month===5)return day<=20?ZODIAC[4]:ZODIAC[5];
+  if(month===6)return day<=20?ZODIAC[5]:ZODIAC[6];
+  if(month===7)return day<=22?ZODIAC[6]:ZODIAC[7];
+  if(month===8)return day<=22?ZODIAC[7]:ZODIAC[8];
+  if(month===9)return day<=22?ZODIAC[8]:ZODIAC[9];
+  if(month===10)return day<=22?ZODIAC[9]:ZODIAC[10];
+  if(month===11)return day<=21?ZODIAC[10]:ZODIAC[11];
+  return ZODIAC[11];
+}
+function getShio(year){return SHIO[(year-1900)%12];}
+function getElemenChina(year){const cycle=((year-1900)%10);return ELEMEN_CHINA[Math.floor(cycle/2)%5];}
+function getGenerasi(year){return GENERASI.find(g=>year>=g.range[0]&&year<=g.range[1])||{name:'Outside Range',icon:'✨',range:[1900,2100],traitsEn:'Unique cohort',traitsId:'Profil unik',descId:'Termasuk cohort di luar rentang generasi yang ditampilkan.',descEn:'This birth year falls outside the currently listed generation ranges.'};}
+function getLifePath(day,month,year){let sum=`${day}${month}${year}`.split('').reduce((a,b)=>a+parseInt(b),0);while(sum>9&&sum!==11&&sum!==22&&sum!==33){sum=sum.toString().split('').reduce((a,b)=>a+parseInt(b),0);}return sum;}
+function getWeton(date){const epochUTC=Date.UTC(1970,0,1);const targetUTC=Date.UTC(date.getFullYear(),date.getMonth(),date.getDate());const diff=Math.floor((targetUTC-epochUTC)/86400000);const hariIdx=date.getDay();const pasaranIdx=((diff%5)+5+3)%5;return{hariJawa:HARI_JAWA[hariIdx],pasaran:PASARAN[pasaranIdx],neptu:HARI_NEPTU[hariIdx]+PASARAN_NEPTU[pasaranIdx],hariNeptu:HARI_NEPTU[hariIdx],pasaranNeptu:PASARAN_NEPTU[pasaranIdx]};}
+function getLuckyNumbers(lp){const nums=new Set([lp]);nums.add((lp*2)%9||9);nums.add((lp+3)%9||9);nums.add((lp+7)%9||9);return[...nums].slice(0,4);}
+function getMoonPhase(date){let year=date.getFullYear(),month=date.getMonth()+1,day=date.getDate();if(month<3){year--;month+=12;}let jd=365.25*year+30.6*month+day-694039.09;jd/=29.5305882;let b=Math.round((jd-Math.floor(jd))*8);const phases=[{phaseEn:'🌑 New Moon',phaseId:'🌑 Bulan Baru',meaningEn:'New beginnings, intention setting',meaningId:'Awal baru, menetapkan niat, menanam benih niat.'},{phaseEn:'🌒 Waxing Crescent',phaseId:'🌒 Sabit Muda',meaningEn:'Growth, learning, gathering resources',meaningId:'Pertumbuhan, belajar, mengumpulkan sumber daya.'},{phaseEn:'🌓 First Quarter',phaseId:'🌓 Perbani Awal',meaningEn:'Action, decision making, challenges',meaningId:'Aksi, pengambilan keputusan, mengatasi tantangan.'},{phaseEn:'🌔 Waxing Gibbous',phaseId:'🌔 Cembung Muda',meaningEn:'Refinement, adjustment, preparation',meaningId:'Penyempurnaan, penyesuaian, persiapan.'},{phaseEn:'🌕 Full Moon',phaseId:'🌕 Bulan Purnama',meaningEn:'Completion, illumination, celebration',meaningId:'Penyelesaian, pencerahan, perayaan.'},{phaseEn:'🌖 Waning Gibbous',phaseId:'🌖 Cembung Tua',meaningEn:'Gratitude, sharing, introspection',meaningId:'Rasa syukur, berbagi, refleksi diri.'},{phaseEn:'🌗 Last Quarter',phaseId:'🌗 Perbani Akhir',meaningEn:'Release, letting go, forgiveness',meaningId:'Melepas, mengikhlaskan, memaafkan.'},{phaseEn:'🌘 Waning Crescent',phaseId:'🌘 Sabit Tua',meaningEn:'Rest, recuperation, surrender',meaningId:'Istirahat, pemulihan, berserah.'}];return phases[b%8];}
+function getAgeInfo(birthDate){const today=new Date();const now=new Date(today.getFullYear(),today.getMonth(),today.getDate());const b=new Date(birthDate.getFullYear(),birthDate.getMonth(),birthDate.getDate());let years=now.getFullYear()-b.getFullYear(),months=now.getMonth()-b.getMonth(),days=now.getDate()-b.getDate();if(days<0){days+=new Date(now.getFullYear(),now.getMonth(),0).getDate();months--;}if(months<0){months+=12;years--;}let nby=now.getFullYear();const cyb=new Date(now.getFullYear(),b.getMonth(),b.getDate());if(cyb<now)nby++;const nb=new Date(nby,b.getMonth(),b.getDate());let mtb=(nb.getFullYear()-now.getFullYear())*12+(nb.getMonth()-now.getMonth());let dtb=nb.getDate()-now.getDate();if(dtb<0){mtb--;dtb+=new Date(nb.getFullYear(),nb.getMonth(),0).getDate();}return{ageYears:years,ageMonths:months,ageDays:days,nextAge:years+1,monthsToBirthday:mtb,daysToBirthday:dtb};}
+function getMonthLabels() {
+  return currentLang === 'en'
+    ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    : ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+}
+function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
+function onWheelSelectScroll(ev){
+  ev.preventDefault();
+  const select = ev.currentTarget;
+  const direction = ev.deltaY > 0 ? 1 : -1;
+  let next = select.selectedIndex + direction;
+  const max = select.options.length - 1;
+  const infinite = select.id.includes('dayWheel') || select.id.includes('monthWheel');
+  if (infinite) {
+    if (next < 0) next = max;
+    if (next > max) next = 0;
+  } else {
+    if (next < 0) next = 0;
+    if (next > max) next = max;
+  }
+  select.selectedIndex = next;
+  select.dispatchEvent(new Event('change'));
+}
+function fillWheelOptions(prefix){
+  const dayEl = document.getElementById(`${prefix}-dayWheel`);
+  const monthEl = document.getElementById(`${prefix}-monthWheel`);
+  const yearEl = document.getElementById(`${prefix}-yearWheel`);
+  const hidden = document.getElementById(`${prefix}-birthdate`);
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let y = currentYear; y >= 1900; y--) years.push(y);
+  const prev = hidden.value ? hidden.value.split('-').map(Number) : [currentYear - 20, 1, 1];
+  const [py, pm, pd] = prev;
+
+  monthEl.innerHTML = getMonthLabels().map((label, idx) => `<option value="${idx + 1}">${label}</option>`).join('');
+  yearEl.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+  const maxDay = daysInMonth(py, pm);
+  dayEl.innerHTML = Array.from({ length: maxDay }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
+
+  dayEl.value = String(Math.min(pd, maxDay));
+  monthEl.value = String(pm);
+  yearEl.value = String(py);
+  syncHiddenBirthDate(prefix);
+}
+function refreshDayWheel(prefix){
+  const dayEl = document.getElementById(`${prefix}-dayWheel`);
+  const monthEl = document.getElementById(`${prefix}-monthWheel`);
+  const yearEl = document.getElementById(`${prefix}-yearWheel`);
+  const selectedDay = parseInt(dayEl.value || '1', 10);
+  const year = parseInt(yearEl.value, 10);
+  const month = parseInt(monthEl.value, 10);
+  const maxDay = daysInMonth(year, month);
+  dayEl.innerHTML = Array.from({ length: maxDay }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
+  dayEl.value = String(Math.min(selectedDay, maxDay));
+}
+function syncHiddenBirthDate(prefix){
+  const dayEl = document.getElementById(`${prefix}-dayWheel`);
+  const monthEl = document.getElementById(`${prefix}-monthWheel`);
+  const yearEl = document.getElementById(`${prefix}-yearWheel`);
+  const hidden = document.getElementById(`${prefix}-birthdate`);
+  const day = String(dayEl.value).padStart(2, '0');
+  const month = String(monthEl.value).padStart(2, '0');
+  const year = String(yearEl.value);
+  hidden.value = `${year}-${month}-${day}`;
+}
+function bindWheel(prefix){
+  const ids = [`${prefix}-dayWheel`, `${prefix}-monthWheel`, `${prefix}-yearWheel`];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    el.addEventListener('wheel', onWheelSelectScroll, { passive: false });
+    el.addEventListener('change', () => {
+      if (id.includes('monthWheel') || id.includes('yearWheel')) refreshDayWheel(prefix);
+      syncHiddenBirthDate(prefix);
+    });
+  });
+}
+function setWheelFromDate(prefix, dateStr){
+  if (!dateStr) return;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!y || !m || !d) return;
+  document.getElementById(`${prefix}-yearWheel`).value = String(y);
+  document.getElementById(`${prefix}-monthWheel`).value = String(m);
+  refreshDayWheel(prefix);
+  document.getElementById(`${prefix}-dayWheel`).value = String(d);
+  syncHiddenBirthDate(prefix);
+}
+function initWheelPickers(){
+  fillWheelOptions('m');
+  fillWheelOptions('d');
+  bindWheel('m');
+  bindWheel('d');
+}
+
+function formatDate(date){
+  if(currentLang==='en')return date.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return`${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function t(){return I18N[currentLang];}
+function localizeElementName(n){if(currentLang==='id')return n;const m={Bumi:'Earth',Udara:'Air',Air:'Water',Api:'Fire',Tanah:'Earth',Logam:'Metal',Kayu:'Wood'};return m[n]||n;}
+function localizeZodiacDateRange(r){if(currentLang==='id')return r;return r.replace('Des','Dec').replace('Mei','May').replace('Ags','Aug').replace('Okt','Oct');}
+function localizeMonthName(n){if(currentLang==='id')return n;const m={Januari:'January',Februari:'February',Maret:'March',April:'April',Mei:'May',Juni:'June',Juli:'July',Agustus:'August',September:'September',Oktober:'October',November:'November',Desember:'December'};return m[n]||n;}
+function localizeDesc(type,key,fallback){if(currentLang==='id')return fallback;if(type==='zodiac')return ZODIAC_DESC_EN[key]||fallback;if(type==='shio')return SHIO_DESC_EN[key]||fallback;if(type==='element')return ELEMENT_DESC_EN[key]||fallback;return fallback;}
+function localizeNumerology(lp,fallback){if(currentLang==='id')return fallback;return NUMEROLOGY_EN[lp]||fallback;}
+function localizeWetonMeaning(n){const id=WETON_MAKNA[n]||'Jiwa yang unik dengan perpaduan energi spesial.';return currentLang==='id'?id:'A unique soul with a distinctive blend of energies.';}
+function getShioLocalized(shio){if(currentLang==='en')return{name:SHIO_NAME_EN[shio.name]||shio.name,traits:SHIO_TRAITS_EN[shio.name]||shio.traits};return{name:shio.name,traits:shio.traits};}
+function getZodiacTraitsLocalized(zodiac){if(currentLang==='id')return zodiac.traits;const m={Ambisius:'Ambitious',Disiplin:'Disciplined',Sabar:'Patient',Praktis:'Practical',Inovatif:'Innovative',Bebas:'Free-spirited',Humanis:'Humanitarian',Visioner:'Visionary',Empatik:'Empathetic',Kreatif:'Creative',Intuitif:'Intuitive','Penuh Kasih':'Compassionate',Berani:'Bold',Energik:'Energetic',Spontan:'Spontaneous',Pemimpin:'Leader',Loyal:'Loyal',Andal:'Reliable',Sensualis:'Sensual',Cerdas:'Smart',Adaptif:'Adaptable',Komunikatif:'Communicative',Penasaran:'Curious',Pelindung:'Protective','Penuh Cinta':'Loving',Sensitif:'Sensitive','Percaya Diri':'Confident','Murah Hati':'Generous',Hangat:'Warm',Karismatik:'Charismatic',Analitis:'Analytical',Teliti:'Detail-oriented',Membantu:'Helpful',Terpercaya:'Trustworthy',Adil:'Fair','Penuh Gaya':'Stylish',Diplomatik:'Diplomatic',Harmonis:'Harmonious',Intens:'Intense',Misteri:'Mysterious',Setia:'Faithful',Transformatif:'Transformative',Optimis:'Optimistic',Jujur:'Honest',Petualang:'Adventurous',Filosofis:'Philosophical'};return zodiac.traits.map(x=>m[x]||x);}
+function getBirthstoneLocalized(bs){if(currentLang==='en')return{name:bs.stone,desc:STONE_DESC_EN[bs.month]||bs.desc,month:localizeMonthName(bs.month),colorName:COLOR_NAME_EN[bs.colorName]||bs.colorName};return{name:`${STONE_NAME_ID[bs.stone]||bs.stone} (${bs.stone})`,desc:bs.desc,month:bs.month,colorName:bs.colorName};}
+function getBirthFlowerLocalized(bf){if(currentLang==='en')return{name:FLOWER_NAME_EN[bf.flower]||bf.flower,desc:FLOWER_DESC_EN[bf.month]||bf.desc,month:localizeMonthName(bf.month)};return{name:`${FLOWER_NAME_ID[bf.flower]||bf.flower} (${bf.flower})`,desc:bf.desc,month:bf.month};}
+function localizeLuckyColorName(name){if(currentLang==='id')return name;const m={Merah:'Red',Emas:'Gold',Oranye:'Orange',Kuning:'Yellow',Krem:'Cream',Ungu:'Purple','Biru Muda':'Light Blue',Biru:'Blue','Abu-abu':'Gray',Hijau:'Green','Biru Turquoise':'Turquoise','Merah Muda':'Pink',Perak:'Silver',Putih:'White',Cokelat:'Brown'};return m[name]||name;}
+function getLocalizedDayPoem(dp){return currentLang==='en'?{day:dp.dayEn,poem:dp.poemEn}:{day:dp.dayId,poem:dp.poemId};}
+function getLocalizedGeneration(gen){return{desc:currentLang==='en'?gen.descEn:gen.descId,traits:currentLang==='en'?gen.traitsEn:gen.traitsId};}
+
+// ═══════ CARD HTML ═══════
+function buildCards(year, month, day, date) {
+  const lang = t();
+  const zodiac = getZodiac(month, day);
+  const shio = getShio(year);
+  const shioL = getShioLocalized(shio);
+  const zodiacTraits = getZodiacTraitsLocalized(zodiac);
+  const elemen = getElemenChina(year);
+  const gen = getGenerasi(year);
+  const lifePath = getLifePath(day, month, year);
+  const numData = localizeNumerology(lifePath, NUMEROLOGI_DATA[lifePath] || NUMEROLOGI_DATA[9]);
+  const weton = getWeton(date);
+  const moon = getMoonPhase(date);
+  const dayPoem = getLocalizedDayPoem(DAY_POEMS[date.getDay()]);
+  const genL = getLocalizedGeneration(gen);
+  const ageInfo = getAgeInfo(date);
+  const bs = BIRTHSTONE[month - 1];
+  const bsL = getBirthstoneLocalized(bs);
+  const bf = BIRTH_FLOWER[month - 1];
+  const bfL = getBirthFlowerLocalized(bf);
+  const luckyNums = getLuckyNumbers(lifePath);
+  const luckyColors = LUCKY_COLORS[lifePath] || LUCKY_COLORS[9];
+
+  return [
+    // Usia
+    `<div class="card card-age">
+      <div class="card-category">${lang.categories.age}</div>
+      <div class="card-icon">🎂</div>
+      <div class="card-title">${lang.labels.age(ageInfo.ageYears, ageInfo.ageMonths, ageInfo.ageDays)}</div>
+      <div class="card-desc">${lang.labels.birthdayCountdown(ageInfo.nextAge, ageInfo.monthsToBirthday, ageInfo.daysToBirthday)}</div>
+    </div>`,
+
+    // Generasi
+    `<div class="card card-generation">
+      <div class="card-category">${lang.categories.generation}</div>
+      <div class="card-icon">${gen.icon}</div>
+      <div class="card-title">${gen.name}</div>
+      <div class="card-subtitle">${gen.range[0]} – ${gen.range[1]}</div>
+      <div class="card-desc">${genL.desc}</div>
+      <div class="tags">${genL.traits.split(',').map(x=>`<span class="tag">${x.trim()}</span>`).join('')}</div>
+    </div>`,
+
+    // Zodiak
+    `<div class="card card-zodiac">
+      <div class="card-category">${lang.categories.zodiac}</div>
+      <div class="card-icon">${zodiac.icon}</div>
+      <div class="card-title">${zodiac.name}</div>
+      <div class="card-subtitle">${localizeZodiacDateRange(zodiac.date)} · ${lang.labels.zodiacElement} ${localizeElementName(zodiac.element)}</div>
+      <div class="card-desc">${localizeDesc('zodiac', zodiac.name, zodiac.desc)}</div>
+      <div class="tags">${zodiacTraits.map(x=>`<span class="tag">${x}</span>`).join('')}</div>
+    </div>`,
+
+    // Shio & Elemen (full width on desktop)
+    `<div class="card card-fengshui full-width">
+      <div class="card-category">${lang.categories.fengshui}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div class="card-icon">${shio.icon}</div>
+          <div class="card-title" style="font-size:22px">${shioL.name}</div>
+          <div class="card-subtitle">${lang.labels.year} ${year}</div>
+          <div class="card-desc" style="font-size:12px;margin-top:8px">${localizeDesc('shio', shio.name, shio.desc)}</div>
+          <div class="tags" style="margin-top:8px">${shioL.traits.map(x=>`<span class="tag">${x}</span>`).join('')}</div>
+        </div>
+        <div>
+          <div class="card-icon">${elemen.icon}</div>
+          <div class="card-title" style="font-size:22px">${localizeElementName(elemen.name)}</div>
+          <div class="card-subtitle">${lang.labels.fiveElements}</div>
+          <div class="card-desc" style="font-size:12px;margin-top:8px">${localizeDesc('element', elemen.name, elemen.desc)}</div>
+        </div>
+      </div>
+    </div>`,
+
+    // Fase Bulan & Day of Birth
+    `<div class="card card-moon full-width">
+      <div class="card-category">${lang.categories.moonDay}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div class="card-icon">${(currentLang==='en'?moon.phaseEn:moon.phaseId).split(' ')[0]}</div>
+          <div class="card-title" style="font-size:22px">${(currentLang==='en'?moon.phaseEn:moon.phaseId).replace(/^(\S+)\s/,'')}</div>
+          <div class="card-subtitle">${lang.labels.moonAtBirth}</div>
+          <div class="card-desc" style="font-size:12px;margin-top:8px">${currentLang==='en'?moon.meaningEn:moon.meaningId}</div>
+        </div>
+        <div>
+          <div class="card-icon">📜</div>
+          <div class="card-title" style="font-size:22px">${dayPoem.day}</div>
+          <div class="card-subtitle">${lang.labels.dayOfBirth}</div>
+          <div class="card-desc" style="font-size:12px;margin-top:8px">${dayPoem.poem}</div>
+        </div>
+      </div>
+    </div>`,
+
+    // Weton
+    `<div class="card card-weton">
+      <div class="card-category">${lang.categories.weton}</div>
+      <div class="weton-box">
+        <div class="weton-item">
+          <div class="wi-label">${lang.labels.day}</div>
+          <div class="wi-val">${weton.hariJawa}</div>
+          <div class="wi-num">Neptu ${weton.hariNeptu}</div>
+        </div>
+        <div class="weton-item">
+          <div class="wi-label">${lang.labels.market}</div>
+          <div class="wi-val">${weton.pasaran}</div>
+          <div class="wi-num">Neptu ${weton.pasaranNeptu}</div>
+        </div>
+      </div>
+      <div class="neptu-total">
+        <div class="nt-label">${lang.labels.wetonTotal}</div>
+        <div class="nt-val">${weton.neptu}</div>
+      </div>
+      <div class="card-desc">${localizeWetonMeaning(weton.neptu)}</div>
+    </div>`,
+
+    // Numerologi
+    `<div class="card card-numerology full-width">
+      <div class="card-category">${lang.categories.numerology}</div>
+      <div class="lifepath-circle">
+        <div class="lp-num">${lifePath}</div>
+        <div class="lp-label">${lang.labels.lifePath}</div>
+      </div>
+      <div class="card-title">${numData.title}</div>
+      <div class="card-desc">${numData.desc}</div>
+    </div>`,
+
+    // Birthstone & Flower
+    `<div class="card card-birth full-width">
+      <div class="card-category">${lang.categories.birth}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div class="card-icon">${bs.icon}</div>
+          <div class="card-title" style="font-size:18px">${bsL.name}</div>
+          <div class="card-subtitle">${lang.labels.stone} ${bsL.month}</div>
+          <div class="card-desc" style="font-size:12px;margin-top:8px">${bsL.desc}</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px">
+            <div style="width:18px;height:18px;border-radius:50%;background:${bs.color};box-shadow:0 2px 8px rgba(0,0,0,0.15)"></div>
+            <span style="font-size:11px;color:var(--muted)">${bsL.colorName}</span>
+          </div>
+        </div>
+        <div>
+          <div class="card-icon">${bf.icon}</div>
+          <div class="card-title" style="font-size:18px">${bfL.name.split(' & ')[0]}</div>
+          <div class="card-subtitle">${lang.labels.flower} ${bfL.month}</div>
+          <div class="card-desc" style="font-size:12px;margin-top:8px">${bfL.desc}</div>
+        </div>
+      </div>
+    </div>`,
+
+    // Lucky
+    `<div class="card card-lucky full-width">
+      <div class="card-category">${lang.categories.lucky}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+        <div>
+          <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">${lang.labels.luckyNumber}</div>
+          <div class="lucky-numbers">${luckyNums.map(n=>`<div class="lucky-num">${n}</div>`).join('')}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">${lang.labels.luckyColor}</div>
+          <div class="color-swatches">${luckyColors.map(c=>`<div class="swatch"><div class="swatch-dot" style="background:${c.hex}"></div><span>${localizeLuckyColorName(c.name)}</span></div>`).join('')}</div>
+        </div>
+      </div>
+    </div>`,
+  ];
+}
+
+// ═══════ GENERATE ═══════
+function handleGenerateClick(viewType) {
+  const inputId = viewType === 'desktop' ? 'd-birthdate' : 'm-birthdate';
+  const inputVal = document.getElementById(inputId).value;
+  if (!inputVal) { alert(t().noDate); return; }
+
+  const [year, month, day] = inputVal.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  if (!year || !month || !day || Number.isNaN(date.getTime())) { alert(t().invalidDate); return; }
+  if (date > new Date()) { alert(t().futureDate); return; }
+
+  const overlay = document.getElementById('loading-overlay');
+  document.getElementById('loadingText').textContent = t().loading;
+  overlay.classList.add('visible');
+
+  setTimeout(() => {
+    overlay.classList.remove('visible');
+    renderUI(viewType, year, month, day, date);
+  }, 1200);
+}
+
+function renderUI(viewType, year, month, day, date) {
+  const cards = buildCards(year, month, day, date).join('');
+  if (viewType === 'mobile') {
+    document.getElementById('m-bornDateDisplay').textContent = formatDate(date);
+    document.getElementById('m-bornDateLabel').textContent = t().bornDateLabel;
+    document.getElementById('m-cardsGrid').innerHTML = cards;
+    document.querySelectorAll('#m-cardsGrid .card.full-width').forEach(c => c.classList.remove('full-width'));
+    document.getElementById('m-resultSection').classList.add('visible');
+    setTimeout(() => document.getElementById('m-resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    return;
+  }
+  document.getElementById('d-resultsDate').textContent = formatDate(date);
+  document.getElementById('d-resultsEyebrow').textContent = 'BirthCode';
+  document.getElementById('d-cardsGrid').innerHTML = cards;
+  document.getElementById('d-bornDate').textContent = formatDate(date);
+  document.getElementById('d-bornDisplay').classList.add('visible');
+  document.getElementById('d-emptyState').style.display = 'none';
+  document.getElementById('d-results').classList.add('visible');
+  document.getElementById('d-resetBtn').style.display = 'block';
+}
+
+function resetMobile() {
+  fillWheelOptions('m');
+  document.getElementById('m-resultSection').classList.remove('visible');
+  document.getElementById('m-cardsGrid').innerHTML = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetDesktop() {
+  fillWheelOptions('d');
+  document.getElementById('d-results').classList.remove('visible');
+  document.getElementById('d-cardsGrid').innerHTML = '';
+  document.getElementById('d-bornDisplay').classList.remove('visible');
+  document.getElementById('d-emptyState').style.display = '';
+  document.getElementById('d-resetBtn').style.display = 'none';
+}
+
+function shareResult() {
+  const text = t().shareText;
+  if (navigator.share) {
+    navigator.share({ title: t().shareTitle, text, url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert(t().sharedCopied));
+  }
+}
+async function downloadImage(targetId){
+  const source = document.getElementById(targetId);
+  if (!source) { alert(t().noDate); return; }
+  if (typeof html2canvas !== 'function') { alert(t().imageError); return; }
+  const ids = ['m-downloadBtn', 'd-downloadBtn'];
+  ids.forEach((id) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = t().downloadingImage;
+  });
+  try {
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('.action-row, .desk-actions').forEach((el) => el.remove());
+    clone.querySelectorAll('.card').forEach((card) => {
+      card.style.opacity = '1';
+      card.style.transform = 'none';
+      card.style.animation = 'none';
+    });
+    const captureHost = document.createElement('div');
+    clone.style.width = `${Math.max(340, Math.round(source.getBoundingClientRect().width))}px`;
+    captureHost.style.position = 'fixed';
+    captureHost.style.left = '-99999px';
+    captureHost.style.top = '0';
+    captureHost.style.padding = '24px';
+    captureHost.style.background = '#FAF7F2';
+    captureHost.appendChild(clone);
+    document.body.appendChild(captureHost);
+    const canvas = await html2canvas(clone, {
+      backgroundColor: '#FAF7F2',
+      useCORS: true,
+      scale: 2,
+    });
+    captureHost.remove();
+    const link = document.createElement('a');
+    link.download = `BirthCode-${new Date().getTime()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    console.error(err);
+    alert(t().imageError);
+  } finally {
+    ids.forEach((id) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.disabled = false;
+      btn.textContent = t().downloadBtn;
+    });
+  }
+}
+
+function updateStaticTexts() {
+  const lang = t();
+  document.documentElement.lang = currentLang;
+  document.getElementById('btn-id').classList.toggle('active', currentLang === 'id');
+  document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+
+  // Mobile
+  document.getElementById('m-headerEyebrow').innerHTML = '<a href="https://rhadzor.id" target="_blank" rel="noopener noreferrer">✦ RHADZOR.ID</a>';
+  document.getElementById('m-headerDesc').innerHTML = lang.desc;
+  document.getElementById('m-birthLabel').textContent = lang.birthLabel;
+  document.getElementById('m-generateBtn').textContent = lang.generateBtn;
+  document.getElementById('m-bornDateLabel').textContent = lang.bornDateLabel;
+  document.getElementById('m-resetBtn').textContent = lang.resetBtn;
+  document.getElementById('m-shareBtn').textContent = lang.shareBtn;
+  document.getElementById('m-downloadBtn').textContent = lang.downloadBtn;
+  document.getElementById('m-footerText').textContent = lang.footer;
+
+  // Desktop
+  document.getElementById('d-tagline').innerHTML = lang.tagline;
+  document.getElementById('d-sub').textContent = lang.subDesc;
+  document.getElementById('d-birthLabel').textContent = lang.birthLabel;
+  document.getElementById('d-generateBtn').textContent = lang.generateBtn;
+  document.getElementById('d-bornLabel').textContent = lang.bornDateLabel;
+  document.getElementById('d-resetBtn').textContent = lang.resetLink;
+  document.getElementById('d-shareBtn').textContent = lang.shareBtn;
+  document.getElementById('d-downloadBtn').textContent = lang.downloadBtn;
+  document.getElementById('d-footerText').textContent = lang.footer;
+  document.getElementById('d-emptyTitle').textContent = lang.emptyTitle;
+  document.getElementById('d-emptySub').textContent = lang.emptySub;
+  document.getElementById('loadingText').textContent = lang.loading;
+
+  fillWheelOptions('m');
+  fillWheelOptions('d');
+}
+
+function setLanguage(lang) {
+  currentLang = lang === 'en' ? 'en' : 'id';
+  updateStaticTexts();
+  const isDesktop = window.innerWidth >= 900;
+  const inputId = isDesktop ? 'd-birthdate' : 'm-birthdate';
+  const hasResult = isDesktop
+    ? document.getElementById('d-results').classList.contains('visible')
+    : document.getElementById('m-resultSection').classList.contains('visible');
+  if (hasResult && document.getElementById(inputId).value) {
+    if (isDesktop) handleGenerateClick('desktop');
+    else handleGenerateClick('mobile');
+  }
+}
+
+initWheelPickers();
+updateStaticTexts();
+</script>
+</body>
+</html>
