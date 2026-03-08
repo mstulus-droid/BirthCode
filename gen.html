@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#FAF7F2">
+<title>BirthCode — Detail Generasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --surface: #FFFFFF;
+    --text: #1A1714;
+    --muted: #8A8480;
+    --border: #EDE9E3;
+    --accent1: #C4785A;
+    --accent2: #6B8F71;
+    --accent3: #7B6EA6;
+    --accent4: #C4A85A;
+    --accent5: #5A8FA6;
+    --shadow: 0 2px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.09);
+    --radius: 20px;
+    --timeline-line: #EDE9E3;
+    --timeline-active: #C4785A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ═══════════════════════════════════════
+     POPUP OVERLAY
+  ═══════════════════════════════════════ */
+  .popup-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(26, 23, 20, 0.45);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .popup-container {
+    background: var(--bg);
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95) translateY(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .popup-overlay.active .popup-container {
+    transform: scale(1) translateY(0);
+  }
+
+  /* ═══════════════════════════════════════
+     POPUP HEADER
+  ═══════════════════════════════════════ */
+  .popup-header {
+    background: var(--surface);
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .popup-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .popup-icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .popup-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .popup-title em {
+    font-style: italic;
+    color: var(--accent1);
+  }
+
+  .popup-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  .close-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close-btn:hover {
+    background: var(--text);
+    color: white;
+    transform: rotate(90deg);
+  }
+  .back-btn {
+    height: 44px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0 14px;
+    margin-right: 8px;
+  }
+  .back-btn:hover {
+    background: var(--text);
+    color: white;
+  }
+
+  /* ═══════════════════════════════════════
+     TIMELINE CONTENT
+  ═══════════════════════════════════════ */
+  .popup-content {
+    overflow-y: auto;
+    padding: 40px 32px;
+    flex: 1;
+  }
+
+  .timeline-intro {
+    text-align: center;
+    margin-bottom: 48px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .timeline-intro h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ═══════════════════════════════════════
+     TIMELINE STRUCTURE
+  ═══════════════════════════════════════ */
+  .timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, 
+      transparent 0%, 
+      var(--timeline-line) 5%, 
+      var(--timeline-line) 95%, 
+      transparent 100%);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+  }
+
+  .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+  .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+  .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+  .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+  .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+  .timeline-item:nth-child(6) { animation-delay: 0.6s; }
+  .timeline-item:nth-child(7) { animation-delay: 0.7s; }
+  .timeline-item:nth-child(8) { animation-delay: 0.8s; }
+  .timeline-item:nth-child(9) { animation-delay: 0.9s; }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .timeline-item:nth-child(odd) {
+    flex-direction: row-reverse;
+  }
+
+  .timeline-content {
+    width: calc(50% - 40px);
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .timeline-content:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent1);
+  }
+
+  .timeline-item.active .timeline-content {
+    border-color: var(--accent1);
+    background: linear-gradient(135deg, var(--surface) 0%, #FFF9F7 100%);
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    background: var(--surface);
+    border: 3px solid var(--timeline-line);
+    border-radius: 50%;
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item:hover .timeline-dot,
+  .timeline-item.active .timeline-dot {
+    border-color: var(--accent1);
+    background: var(--accent1);
+    transform: translateX(-50%) scale(1.2);
+  }
+
+  .timeline-year {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    top: -10px;
+    z-index: 3;
+  }
+
+  /* ═══════════════════════════════════════
+     GENERATION CARD CONTENT
+  ═══════════════════════════════════════ */
+  .gen-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .gen-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .gen-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .gen-range {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .gen-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .gen-trait {
+    padding: 4px 10px;
+    background: var(--bg);
+    border-radius: 100px;
+    font-size: 11px;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .gen-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item.active .gen-desc {
+    -webkit-line-clamp: unset;
+    display: block;
+  }
+
+  .expand-hint {
+    font-size: 11px;
+    color: var(--accent1);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .timeline-content:hover .expand-hint {
+    opacity: 1;
+  }
+
+  .timeline-item.active .expand-hint {
+    display: none;
+  }
+
+  /* ═══════════════════════════════════════
+     DETAIL EXPANSION
+  ═══════════════════════════════════════ */
+  .gen-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s ease,
+                margin 0.3s ease;
+    opacity: 0;
+    margin-top: 0;
+  }
+
+  .timeline-item.active .gen-detail {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .detail-section {
+    margin-bottom: 16px;
+  }
+
+  .detail-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .detail-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .detail-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .detail-highlight {
+    background: linear-gradient(120deg, rgba(196, 120, 90, 0.15) 0%, rgba(196, 120, 90, 0.05) 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  /* ═══════════════════════════════════════
+     CURRENT GENERATION INDICATOR
+  ═══════════════════════════════════════ */
+  .current-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--accent1);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+  }
+
+  .current-badge::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ═══════════════════════════════════════
+     SCROLLBAR
+  ═══════════════════════════════════════ */
+  .popup-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .popup-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .popup-content::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .popup-content::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE
+  ═══════════════════════════════════════ */
+  @media (max-width: 768px) {
+    .popup-container {
+      max-height: 95vh;
+      border-radius: 16px;
+    }
+
+    .popup-header {
+      padding: 20px 24px;
+    }
+
+    .popup-title {
+      font-size: 22px;
+    }
+
+    .popup-content {
+      padding: 24px 20px;
+    }
+
+    .timeline::before {
+      left: 20px;
+    }
+
+    .timeline-item,
+    .timeline-item:nth-child(odd) {
+      flex-direction: column;
+      padding-left: 48px;
+    }
+
+    .timeline-content {
+      width: 100%;
+    }
+
+    .timeline-dot {
+      left: 20px;
+      transform: translateX(-50%);
+    }
+
+    .timeline-year {
+      left: 20px;
+      transform: translateX(-50%);
+      position: relative;
+      top: auto;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .timeline-item:hover .timeline-dot,
+    .timeline-item.active .timeline-dot {
+      transform: translateX(-50%) scale(1.2);
+    }
+  }
+
+  /* ═══════════════════════════════════════
+     TRIGGER BUTTON (Demo Purpose)
+  ═══════════════════════════════════════ */
+  .trigger-btn {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    padding: 16px 28px;
+    background: var(--text);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.2s;
+  }
+
+  .trigger-btn:hover {
+    transform: translateY(-2px);
+    background: #333;
+  }
+  body.embed-mode .trigger-btn { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Trigger Button (Untuk Demo) -->
+<button class="trigger-btn" onclick="openPopup()">✦ Lihat Detail Generasi</button>
+
+<!-- POPUP OVERLAY -->
+<div class="popup-overlay" id="generationPopup">
+  <div class="popup-container">
+    
+    <!-- HEADER -->
+    <div class="popup-header">
+      <div class="popup-title-group">
+        <div class="popup-icon">🧬</div>
+        <div>
+          <div class="popup-title">Linimasa <em>Generasi</em></div>
+          <div class="popup-subtitle">Dari Lost Generation hingga Generasi Beta</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <button class="back-btn" id="backBtn" onclick="handleBack()">&larr; Kembali</button>
+        <button class="close-btn" onclick="closePopup()">✕</button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="popup-content">
+      
+      <div class="timeline-intro">
+        <h2>"Setiap generasi membawa ciri khas, tantangan, dan kekuatan unik yang membentuk cara mereka melihat dunia."</h2>
+      </div>
+
+      <div class="timeline" id="timeline">
+        
+        <!-- Lost Generation -->
+        <div class="timeline-item" data-gen="lost">
+          <div class="timeline-year">1883 – 1900</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">🎭</span>
+              <span class="gen-name">Lost Generation</span>
+            </div>
+            <div class="gen-range">± 1883 – 1900</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Trauma Mental</span>
+              <span class="gen-trait">Pencarian Stabilitas</span>
+              <span class="gen-trait">Ekspresi Seni</span>
+            </div>
+            <div class="gen-desc">
+              Generasi yang tumbuh dan hidup pada masa Perang Dunia I. Banyak mengalami trauma berat akibat kekejaman perang, sering merasa "kehilangan arah" atau disorientasi nilai-nilai kehidupan.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Masa Perang Dunia I membawa perubahan drastis dalam struktur sosial dan nilai-nilai tradisional. Banyak yang kehilangan keyakinan pada kemajuan dan peradaban Barat.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Trauma Mental</span>: Mengalami disorientasi nilai akibat kekejaman perang<br>
+                  • <span class="detail-highlight">Pencarian Stabilitas</span>: Sangat menghargai stabilitas karena hidup di masa ketidakpastian<br>
+                  • <span class="detail-highlight">Pelarian melalui Seni</span>: Memunculkan ekspresi seni dan sastra kuat sebagai bentuk pelarian dari trauma
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Greatest Generation -->
+        <div class="timeline-item" data-gen="greatest">
+          <div class="timeline-year">1901 – 1927</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">🎖️</span>
+              <span class="gen-name">Greatest Generation</span>
+            </div>
+            <div class="gen-range">± 1901 – 1927</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Ketangguhan</span>
+              <span class="gen-trait">Disiplin</span>
+              <span class="gen-trait">Patriotisme</span>
+            </div>
+            <div class="gen-desc">
+              Tumbuh di masa Great Depression dan menjadi prajurit utama Perang Dunia II. Dikenal sebagai generasi yang "menyelamatkan dunia" dengan dedikasi tinggi pada kerja keras.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Menghadapi Great Depression dan bertempur di Perang Dunia II. Generasi ini menghadapi tantangan ekonomi dan militer yang luar biasa.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Ketangguhan & Disiplin</span>: Dedication pada kerja keras dan kedisiplinan tinggi<br>
+                  • <span class="detail-highlight">Pengorbanan</span>: Mengutamakan pengorbanan demi keluarga, komunitas, dan negara<br>
+                  • <span class="detail-highlight">Patriotisme</span>: Menempatkan tugas negara di atas kepentingan pribadi
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Silent Generation -->
+        <div class="timeline-item" data-gen="silent">
+          <div class="timeline-year">1928 – 1945</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">🤫</span>
+              <span class="gen-name">Silent Generation</span>
+            </div>
+            <div class="gen-range">1928 – 1945</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Konformis</span>
+              <span class="gen-trait">Patuh Aturan</span>
+              <span class="gen-trait">Stabilitas</span>
+            </div>
+            <div class="gen-desc">
+              Tumbuh saat Depresi Besar, Perang Dunia II, dan awal Perang Dingin. Cenderung berhati-hati, patuh pada aturan, dan menghindari konflik sosial.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Masa transisi dari perang ke stabilitas. Menghadapi awal Perang Dingin dan perubahan geopolitik global.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Konformis</span>: Berhati-hati dan patuh pada aturan, menghindari konflik terbuka<br>
+                  • <span class="detail-highlight">Stabilitas Kerja</span>: Loyal pada satu perusahaan, menjunjung tinggi stabilitas karier<br>
+                  • <span class="detail-highlight">Keluarga Tradisional</span>: Berpegang teguh pada nilai-nilai keluarga dan pernikahan tradisional
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baby Boomers -->
+        <div class="timeline-item" data-gen="boomers">
+          <div class="timeline-year">1946 – 1964</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">👶</span>
+              <span class="gen-name">Baby Boomers</span>
+            </div>
+            <div class="gen-range">1946 – 1964</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Ambisius</span>
+              <span class="gen-trait">Optimis</span>
+              <span class="gen-trait">Work-centric</span>
+            </div>
+            <div class="gen-desc">
+              Ledakan kelahiran pasca-PD II di tengah pertumbuhan ekonomi pesat. Identik dengan prinsip "hidup untuk bekerja" dan menghargai hierarki.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Masa ledakan kelahiran pasca-perang dengan ekonomi yang tumbuh pesat. Era kemakmuran dan konsumerisme.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Ambisius & Berorientasi Karier</span>: Prinsip "live to work", optimisme dan kerja keras<br>
+                  • <span class="detail-highlight">Hormat Hierarki</span>: Menghargai otoritas, hierarki, dan senioritas di tempat kerja<br>
+                  • <span class="detail-highlight">Perubahan Sosial</span>: Penggerak gerakan budaya 60-an seperti hak sipil
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generation X -->
+        <div class="timeline-item" data-gen="x">
+          <div class="timeline-year">1965 – 1980</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">🧑‍💼</span>
+              <span class="gen-name">Generation X</span>
+            </div>
+            <div class="gen-range">1965 – 1980</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Mandiri</span>
+              <span class="gen-trait">Skeptis</span>
+              <span class="gen-trait">Work-Life Balance</span>
+            </div>
+            <div class="gen-desc">
+              Latchkey kids yang tumbuh dengan kedua orang tua bekerja. Generasi transisi analog ke digital dengan moto "bekerja untuk hidup".
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Era transisi teknologi dari analog ke digital. Meningkatnya perceraian dan kedua orang tua bekerja penuh waktu.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Mandiri & Skeptis</span>: Cenderung skeptis terhadap otoritas pemerintah dan institusi<br>
+                  • <span class="detail-highlight">Jembatan Teknologi</span>: Transisi dari analog ke digital, menyaksikan munculnya PC dan MTV<br>
+                  • <span class="detail-highlight">Work-Life Balance</span>: Moto "work to live", memisahkan kehidupan kerja dan keluarga
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Millennials -->
+        <div class="timeline-item" data-gen="millennials">
+          <div class="timeline-year">1981 – 1996</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">🧑‍💻</span>
+              <span class="gen-name">Millennials <span class="current-badge">Kamu di sini</span></span>
+            </div>
+            <div class="gen-range">1981 – 1996</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Tech-Savvy</span>
+              <span class="gen-trait">Purpose-Driven</span>
+              <span class="gen-trait">Kolaboratif</span>
+            </div>
+            <div class="gen-desc">
+              Generasi pertama yang dewasa di abad ke-21. Tumbuh bersama internet dan media sosial awal, mengutamakan pengalaman dan makna dalam pekerjaan.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Lahir bersama internet dan globalisasi. Generasi yang paling beragam secara ras dan etnis.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Tech-Savvy</span>: Mahir menggunakan internet dan perangkat digital real-time<br>
+                  • <span class="detail-highlight">Pergeseran Prioritas</span>: Mengutamakan pengalaman dibanding kepemilikan material<br>
+                  • <span class="detail-highlight">Fleksibilitas</span>: Menginginkan hierarki datar, fleksibilitas tinggi, dan makna dalam pekerjaan
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generation Z -->
+        <div class="timeline-item" data-gen="z">
+          <div class="timeline-year">1997 – 2012</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">🧑‍🎤</span>
+              <span class="gen-name">Generation Z</span>
+            </div>
+            <div class="gen-range">1997 – 2012</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Digital Native</span>
+              <span class="gen-trait">Realistis</span>
+              <span class="gen-trait">Aktivis</span>
+            </div>
+            <div class="gen-desc">
+              Tumbuh sepenuhnya di era smartphone dan media sosial. Realistis secara finansial namun rentan terhadap isu kesehatan mental.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Era dominasi smartphone, internet berkecepatan tinggi, dan media sosial. Tumbuh di bayang-bayang krisis ekonomi dan perubahan iklim.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Digital Native Sejati</span>: Ketergantungan luar biasa pada teknologi digital, multitasking tinggi<br>
+                  • <span class="detail-highlight">Realistis & Hati-hati</span>: Praktis dalam urusan finansial, sadar isu kesehatan mental<br>
+                  • <span class="detail-highlight">Aktivisme Sosial</span>: Peduli vokal terhadap keadilan sosial, kesetaraan, dan lingkungan
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generation Alpha -->
+        <div class="timeline-item" data-gen="alpha">
+          <div class="timeline-year">2010 – 2024</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">👶</span>
+              <span class="gen-name">Generation Alpha</span>
+            </div>
+            <div class="gen-range">2010 – 2024</div>
+            <div class="gen-traits">
+              <span class="gen-trait">Generation Glass</span>
+              <span class="gen-trait">Visual Learner</span>
+              <span class="gen-trait">Global</span>
+            </div>
+            <div class="gen-desc">
+              Generasi pertama yang lahir utuh di abad ke-21. Berinteraksi dengan dunia melalui layar kaca sejak bayi, dengan literasi digital luar biasa.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Lahir saat AI dan asisten suara sudah menjadi bagian kehidupan sehari-hari. Generasi dengan paparan teknologi paling awal.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">Generation Glass</span>: Berinteraksi dengan dunia melalui layar kaca sejak bayi<br>
+                  • <span class="detail-highlight">Pembelajar Visual</span>: Tidak merespons baik pembelajaran auditori atau hafalan tradisional<br>
+                  • <span class="detail-highlight">Pendidikan Tertinggi</span>: Diprediksi menjadi generasi paling terdidik dan sejahtera secara material
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generation Beta -->
+        <div class="timeline-item" data-gen="beta">
+          <div class="timeline-year">2025 – 2039</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content" onclick="toggleGeneration(this)">
+            <div class="gen-header">
+              <span class="gen-icon">🔮</span>
+              <span class="gen-name">Generation Beta</span>
+            </div>
+            <div class="gen-range">2025 – 2039</div>
+            <div class="gen-traits">
+              <span class="gen-trait">AI Native</span>
+              <span class="gen-trait">Metaverse</span>
+              <span class="gen-trait">Empati</span>
+            </div>
+            <div class="gen-desc">
+              Generasi masa depan yang tumbuh dengan AI tutor dan integrasi Metaverse. Fokus karier diprediksi bergeser pada kreativitas dan kecerdasan emosional.
+            </div>
+            <div class="expand-hint">Klik untuk detail ↓</div>
+            
+            <div class="gen-detail">
+              <div class="detail-section">
+                <div class="detail-label">Konteks Sejarah</div>
+                <div class="detail-text">
+                  Era komputasi mikro, kecerdasan buatan, dan realitas virtual yang terintegrasi dalam kehidupan dasar.
+                </div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Karakteristik Detail</div>
+                <div class="detail-text">
+                  • <span class="detail-highlight">AI & Metaverse Life</span>: Tumbuh dengan tutor berbasis AI dan integrasi VR dalam kehidupan dasar<br>
+                  • <span class="detail-highlight">Gratifikasi Instan</span>: Paparan teknologi memupuk keinginan akan gratifikasi instan<br>
+                  • <span class="detail-highlight">Karier Berbasis Empati</span>: Fokus bergeser pada kreativitas dan kecerdasan emosional di dunia yang terotomatisasi
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const isEmbed = params.get('embed') === '1';
+  const yearParam = Number(params.get('year'));
+
+  const generationData = {
+    lost: { name: 'Lost Generation', range: [1883, 1900] },
+    greatest: { name: 'Greatest Generation', range: [1901, 1927] },
+    silent: { name: 'Silent Generation', range: [1928, 1945] },
+    boomers: { name: 'Baby Boomers', range: [1946, 1964] },
+    x: { name: 'Generation X', range: [1965, 1980] },
+    millennials: { name: 'Millennials', range: [1981, 1996] },
+    z: { name: 'Generation Z', range: [1997, 2012] },
+    alpha: { name: 'Generation Alpha', range: [2010, 2024] },
+    beta: { name: 'Generation Beta', range: [2025, 2039] }
+  };
+
+  function findGenerationKeyByYear(year) {
+    for (const [key, data] of Object.entries(generationData)) {
+      if (year >= data.range[0] && year <= data.range[1]) return key;
+    }
+    return 'millennials';
+  }
+
+  function activateGeneration(key) {
+    const target = document.querySelector(`[data-gen="${key}"]`);
+    if (!target) return;
+    document.querySelectorAll('.timeline-item.active').forEach(el => el.classList.remove('active'));
+    target.classList.add('active');
+    setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
+  }
+
+  function toggleGeneration(element) {
+    const item = element.closest('.timeline-item');
+    const isActive = item.classList.contains('active');
+    document.querySelectorAll('.timeline-item.active').forEach(el => {
+      if (el !== item) el.classList.remove('active');
+    });
+    item.classList.toggle('active', !isActive);
+    if (!isActive) {
+      setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    }
+  }
+
+  function openPopup(key = 'millennials') {
+    document.getElementById('generationPopup').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    activateGeneration(key);
+  }
+
+  function closePopup() {
+    if (isEmbed && window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'close-generation-modal' }, '*');
+      return;
+    }
+    document.getElementById('generationPopup').classList.remove('active');
+    document.body.style.overflow = '';
+    document.querySelectorAll('.timeline-item.active').forEach(el => el.classList.remove('active'));
+  }
+
+  function handleBack() {
+    if (isEmbed && window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'close-generation-modal' }, '*');
+      return;
+    }
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    window.location.href = 'index.html';
+  }
+
+  document.getElementById('generationPopup').addEventListener('click', function(e) {
+    if (e.target === this) closePopup();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePopup();
+  });
+
+  if (isEmbed) document.body.classList.add('embed-mode');
+  const initialKey = Number.isFinite(yearParam) ? findGenerationKeyByYear(yearParam) : 'millennials';
+  openPopup(initialKey);
+</script>
+
+</body>
+</html>
+

@@ -590,6 +590,216 @@
 
   .divider { height: 1px; background: var(--border); margin: 4px 0 14px; }
 
+  .card-generation {
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .card-generation:hover {
+    transform: translateY(-2px);
+    border-color: #d7d0c8;
+    box-shadow: var(--shadow-lg);
+  }
+  .card-generation:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+  }
+  .gen-detail-link {
+    margin-top: 12px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent1);
+    font-weight: 500;
+  }
+
+  .gen-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 23, 20, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .gen-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .gen-modal-sheet {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: 86vh;
+    background: var(--bg);
+    border-radius: 24px 24px 0 0;
+    box-shadow: var(--shadow-lg);
+    padding: 28px 18px 22px;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .gen-modal.active .gen-modal-sheet { transform: translateY(0); }
+  .gen-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+  .gen-modal-head {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 0 24px;
+  }
+  .gen-modal-eyebrow {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .gen-modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 31px;
+    line-height: 1.12;
+    font-weight: 500;
+  }
+  .gen-modal-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .gen-modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .gen-modal-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .gen-modal-frame-wrap {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .gen-modal-frame {
+    width: 100%;
+    height: min(72vh, 760px);
+    border: 0;
+    display: block;
+    background: var(--bg);
+  }
+  .gen-timeline {
+    position: relative;
+    padding-left: 18px;
+  }
+  .gen-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 18px;
+    width: 2px;
+    background: var(--border);
+  }
+  .gen-item {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .gen-item:last-child { margin-bottom: 4px; }
+  .gen-item-dot {
+    position: absolute;
+    left: -17px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent1);
+    transition: all 0.2s ease;
+    z-index: 1;
+  }
+  .gen-item.active .gen-item-dot {
+    background: var(--accent1);
+    box-shadow: 0 0 0 4px rgba(196, 120, 90, 0.14);
+  }
+  .gen-item-card {
+    width: 100%;
+    text-align: left;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 13px 14px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .gen-item.active .gen-item-card { border-color: var(--text); }
+  .gen-item-years {
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .gen-item-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .gen-item-desc {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.24s ease;
+  }
+  .gen-item.active .gen-item-desc { grid-template-rows: 1fr; }
+  .gen-item-desc-inner { overflow: hidden; }
+  .gen-item-body {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.62;
+  }
+  .gen-item-body ul {
+    margin: 10px 0 0;
+    padding-left: 18px;
+  }
+
+  @media (min-width: 900px) {
+    .gen-modal {
+      align-items: center;
+      padding: 24px;
+    }
+    .gen-modal-sheet {
+      border-radius: 20px;
+      max-height: 80vh;
+      padding: 30px 22px 24px;
+      transform: scale(0.96);
+    }
+    .gen-modal.active .gen-modal-sheet { transform: scale(1); }
+  }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -721,6 +931,24 @@
   </main>
 </div>
 
+<div id="generationModal" class="gen-modal" aria-hidden="true">
+  <div class="gen-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="genModalTitle">
+    <button class="gen-modal-close" type="button" aria-label="Tutup detail generasi" onclick="closeGenerationModal()">&times;</button>
+    <div class="gen-modal-head">
+      <div class="gen-modal-eyebrow" id="genModalEyebrow">Garis Waktu</div>
+      <div class="gen-modal-title" id="genModalTitle">Evolusi Generasi</div>
+      <div class="gen-modal-sub" id="genModalSub">Konten detail dibuka langsung dari gen.html.</div>
+      <div class="gen-modal-actions">
+        <button type="button" class="gen-modal-btn" id="genModalBackBtn" onclick="closeGenerationModal()">Kembali</button>
+        <button type="button" class="gen-modal-btn" id="genModalOpenPageBtn">Buka Halaman Penuh</button>
+      </div>
+    </div>
+    <div class="gen-modal-frame-wrap">
+      <iframe id="genModalFrame" class="gen-modal-frame" title="Detail Generasi"></iframe>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 // ═══════════════════════════════════════
@@ -845,6 +1073,18 @@ const GENERASI=[
   {name:'Millennials',icon:'🧑‍💻',range:[1981,1996],traitsEn:'Digital natives, purpose-driven, collaborative',traitsId:'Native digital, berorientasi tujuan, kolaboratif',descId:'Akrab dengan internet sejak muda; menilai makna, kolaborasi, dan work-life balance sebagai prioritas.',descEn:'Grew up with the internet; values purpose, collaboration, and work-life balance.'},
   {name:'Generation Z',icon:'🧑‍🎤',range:[1997,2012],traitsEn:'True digital natives, diverse, pragmatic',traitsId:'Digital native sejati, beragam, pragmatis',descId:'Lahir di era media sosial; cepat belajar, inklusif, realistis, dan sadar isu sosial/global.',descEn:'Born into social platforms; fast-learning, inclusive, pragmatic, and socially aware.'},
   {name:'Generation Alpha',icon:'👶',range:[2013,2024],traitsEn:'Tech immersed, global, climate conscious',traitsId:'Sangat akrab teknologi, global, sadar iklim',descId:'Generasi dengan paparan teknologi paling awal; berpikir global, visual, dan peduli keberlanjutan.',descEn:'Most early-tech-exposed generation; globally minded, visual-first, and climate-aware.'},
+];
+
+const GENERATION_TIMELINE = [
+  { key:'lost', name:'Lost Generation', range:[1883,1900], yearsLabel:'1883 - 1900', contextId:'Tumbuh di tengah gejolak Perang Dunia I dan perubahan nilai sosial besar-besaran.', contextEn:'Grew up through World War I and a major shift in social values.', traitsId:['Banyak mengalami trauma perang dan disorientasi nilai kehidupan.','Mencari stabilitas sambil mengekspresikan diri lewat karya seni/sastra.'], traitsEn:['Marked by war trauma and a strong sense of disorientation.','Sought stability while expressing emotion through arts and literature.'] },
+  { key:'greatest', name:'Greatest / GI Generation', range:[1901,1927], yearsLabel:'1901 - 1927', contextId:'Melewati Depresi Besar dan menjadi kekuatan utama pada Perang Dunia II.', contextEn:'Lived through the Great Depression and became central in World War II.', traitsId:['Dikenal tangguh, disiplin, dan berorientasi tanggung jawab.','Nilai pengorbanan untuk keluarga, komunitas, dan negara sangat kuat.'], traitsEn:['Known for resilience, discipline, and duty.','Strong culture of sacrifice for family, community, and country.'] },
+  { key:'silent', name:'Silent Generation', range:[1928,1945], yearsLabel:'1928 - 1945', contextId:'Dibesarkan saat Depresi Besar, Perang Dunia II, dan awal Perang Dingin.', contextEn:'Raised during the Great Depression, WWII, and early Cold War.', traitsId:['Cenderung patuh aturan, loyal, dan menghindari konflik terbuka.','Menjunjung stabilitas kerja dan nilai keluarga tradisional.'], traitsEn:['Typically rule-abiding, loyal, and conflict-avoidant.','Valued job stability and traditional family roles.'] },
+  { key:'boomers', name:'Baby Boomers', range:[1946,1964], yearsLabel:'1946 - 1964', contextId:'Lahir pasca-perang saat ledakan kelahiran dan pertumbuhan ekonomi cepat.', contextEn:'Born after WWII during a birth boom and rapid economic growth.', traitsId:['Ambisius, fokus karier, dan menghargai hierarki organisasi.','Mendorong banyak perubahan sosial sekaligus era konsumerisme.'], traitsEn:['Ambitious, career-focused, and hierarchy-respecting.','Drove social change while growing into consumer-era prosperity.'] },
+  { key:'genx', name:'Generation X', range:[1965,1980], yearsLabel:'1965 - 1980', contextId:'Generasi transisi dari analog ke digital dengan lingkungan yang berubah cepat.', contextEn:'A transition generation from analog to digital in rapidly changing times.', traitsId:['Mandiri, skeptis pada otoritas, dan pragmatis.','Sangat menekankan work-life balance.'], traitsEn:['Independent, skeptical of authority, and pragmatic.','Strongly values work-life balance.'] },
+  { key:'millennials', name:'Millennials', range:[1981,1996], yearsLabel:'1981 - 1996', contextId:'Tumbuh bersama internet awal dan memasuki dewasa di abad ke-21.', contextEn:'Grew up with early internet and entered adulthood in the 21st century.', traitsId:['Tech-savvy, kolaboratif, dan mencari makna dalam pekerjaan.','Lebih memilih pengalaman dibanding kepemilikan material.'], traitsEn:['Tech-savvy, collaborative, and purpose-driven at work.','Leans toward experiences over material ownership.'] },
+  { key:'genz', name:'Generation Z', range:[1997,2012], yearsLabel:'1997 - 2012', contextId:'Lahir di era smartphone, media sosial, dan internet super cepat.', contextEn:'Born into smartphones, social media, and always-on connectivity.', traitsId:['Digital native sejati, cepat beradaptasi, dan multitasking tinggi.','Vokal pada isu sosial, kesehatan mental, dan keberlanjutan.'], traitsEn:['True digital natives with high adaptability and multitasking.','Outspoken on social issues, mental health, and sustainability.'] },
+  { key:'alpha', name:'Generation Alpha', range:[2013,2024], yearsLabel:'2013 - 2024', contextId:'Generasi pertama yang lahir penuh di abad ke-21 dengan paparan AI sejak dini.', contextEn:'First fully 21st-century generation with early AI exposure.', traitsId:['Sangat visual dan dekat dengan perangkat layar sejak kecil.','Diprediksi memiliki model belajar dan karier yang sangat digital.'], traitsEn:['Highly visual and screen-native from early childhood.','Likely to adopt highly digital learning and career models.'] },
+  { key:'beta', name:'Generation Beta', range:[2025,2039], yearsLabel:'2025 - 2039', contextId:'Kelompok generasi paling baru setelah Alpha dalam era AI yang makin matang.', contextEn:'Newest cohort after Alpha, growing up in mature AI ecosystems.', traitsId:['Diproyeksikan tumbuh dengan AI tutor dan ekosistem virtual yang kuat.','Kemampuan empati dan kreativitas diprediksi jadi pembeda utama di masa depan.'], traitsEn:['Expected to grow with AI tutors and strong virtual ecosystems.','Empathy and creativity may become key differentiators.'] },
 ];
 
 const DAY_POEMS={
@@ -1106,13 +1346,14 @@ function buildCards(year, month, day, date) {
     </div>`,
 
     // Generasi
-    `<div class="card card-generation">
+    `<div class="card card-generation" role="button" tabindex="0" data-generation="${gen.name}" data-year="${year}">
       <div class="card-category">${lang.categories.generation}</div>
       <div class="card-icon">${gen.icon}</div>
       <div class="card-title">${gen.name}</div>
       <div class="card-subtitle">${gen.range[0]} – ${gen.range[1]}</div>
       <div class="card-desc">${genL.desc}</div>
       <div class="tags">${genL.traits.split(',').map(x=>`<span class="tag">${x.trim()}</span>`).join('')}</div>
+      <div class="gen-detail-link">${currentLang === 'en' ? 'Tap to view full generation timeline' : 'Ketuk untuk lihat detail timeline generasi'}</div>
     </div>`,
 
     // Zodiak
@@ -1279,6 +1520,68 @@ function renderUI(viewType, year, month, day, date) {
   document.getElementById('d-resetBtn').style.display = 'block';
 }
 
+function buildGenDetailUrl(birthYear, language) {
+  const params = new URLSearchParams();
+  if (birthYear) params.set('year', String(birthYear));
+  params.set('lang', language || 'id');
+  params.set('embed', '1');
+  return `gen.html?${params.toString()}`;
+}
+
+function openGenerationModal(generationName, birthYear) {
+  const modal = document.getElementById('generationModal');
+  const frame = document.getElementById('genModalFrame');
+  const modalUrl = buildGenDetailUrl(Number(birthYear), currentLang);
+  const pageUrl = modalUrl.replace('embed=1', 'embed=0');
+  const isEn = currentLang === 'en';
+
+  document.getElementById('genModalEyebrow').textContent = isEn ? 'Timeline' : 'Garis Waktu';
+  document.getElementById('genModalTitle').textContent = isEn ? `Generation: ${generationName || '-'}` : `Generasi: ${generationName || '-'}`;
+  document.getElementById('genModalSub').textContent = isEn
+    ? 'Loaded from gen.html. You can continue in full page mode.'
+    : 'Konten diambil utuh dari gen.html. Kamu bisa lanjut ke mode halaman penuh.';
+
+  frame.src = modalUrl;
+  document.getElementById('genModalOpenPageBtn').onclick = () => window.open(pageUrl, '_self');
+
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeGenerationModal() {
+  const modal = document.getElementById('generationModal');
+  const frame = document.getElementById('genModalFrame');
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  frame.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+function setupGenerationCardActions() {
+  ['m-cardsGrid', 'd-cardsGrid'].forEach((gridId) => {
+    const grid = document.getElementById(gridId);
+    if (!grid || grid.dataset.genBound === '1') return;
+
+    grid.addEventListener('click', (e) => {
+      const card = e.target.closest('.card-generation');
+      if (!card) return;
+      openGenerationModal(card.dataset.generation || '', card.dataset.year || '');
+    });
+
+    grid.addEventListener('keydown', (e) => {
+      const card = e.target.closest('.card-generation');
+      if (!card) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openGenerationModal(card.dataset.generation || '', card.dataset.year || '');
+      }
+    });
+
+    grid.dataset.genBound = '1';
+  });
+}
+
 function resetMobile() {
   fillWheelOptions('m');
   document.getElementById('m-resultSection').classList.remove('visible');
@@ -1405,6 +1708,20 @@ function setLanguage(lang) {
 
 initWheelPickers();
 updateStaticTexts();
+setupGenerationCardActions();
+
+document.getElementById('generationModal').addEventListener('click', function(e) {
+  if (e.target === this) closeGenerationModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeGenerationModal();
+});
+
+window.addEventListener('message', function(e) {
+  if (!e || !e.data || typeof e.data !== 'object') return;
+  if (e.data.type === 'close-generation-modal') closeGenerationModal();
+});
 </script>
 </body>
 </html>
