@@ -95,16 +95,53 @@
     overflow-y: auto;
   }
   .zodiac-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    position: relative;
+    display: flex;
+    flex-direction: column;
     gap: 14px;
   }
+  .zodiac-grid::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
   .z-item {
+    position: relative;
     border: 1px solid var(--border);
     border-radius: 16px;
     background: var(--surface);
     box-shadow: var(--shadow);
     overflow: hidden;
+    margin-left: 34px;
+  }
+  .z-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent1);
+    left: -24px;
+    top: 20px;
+  }
+  .z-line-range {
+    position: absolute;
+    left: -8px;
+    top: -10px;
+    transform: translateX(-100%);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
   }
   .z-item.active {
     border-color: var(--accent1);
@@ -120,7 +157,7 @@
   .z-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 10px;
   }
   .z-title {
@@ -217,8 +254,44 @@
   body.embed-mode .popup-content { padding: 8px; }
 
   @media (min-width: 900px) {
-    .zodiac-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
-    .z-item.active { grid-column: 1 / -1; }
+    .zodiac-grid {
+      gap: 18px;
+    }
+    .zodiac-grid::before {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .z-item {
+      width: calc(50% - 34px);
+      margin-left: 0;
+    }
+    .z-item.left {
+      margin-right: auto;
+    }
+    .z-item.right {
+      margin-left: auto;
+    }
+    .z-item.left .z-dot {
+      left: auto;
+      right: -41px;
+    }
+    .z-item.right .z-dot {
+      left: -41px;
+      right: auto;
+    }
+    .z-item.left .z-line-range {
+      left: auto;
+      right: -54px;
+      transform: translateX(100%);
+    }
+    .z-item.right .z-line-range {
+      left: -54px;
+      right: auto;
+      transform: translateX(-100%);
+    }
+    .z-item.active {
+      box-shadow: 0 8px 36px rgba(0,0,0,0.12);
+    }
   }
 </style>
 </head>
@@ -369,13 +442,15 @@ function render() {
   document.getElementById('title').textContent = ui.title;
   document.getElementById('subtitle').textContent = ui.subtitle;
 
-  const html = Object.entries(ZODIAC_DATA).map(([key, z]) => {
+  const html = Object.entries(ZODIAC_DATA).map(([key, z], idx) => {
     const name = lang === 'en' ? z.enName : z.idName;
     const range = lang === 'en' ? z.enRange : z.idRange;
     const element = lang === 'en' ? z.enElement : z.idElement;
     const traits = lang === 'en' ? z.enTraits : z.idTraits;
     const stereo = lang === 'en' ? z.enStereo : z.idStereo;
-    return `<div class="z-item" data-sign="${key}">
+    return `<div class="z-item ${idx % 2 === 0 ? 'left' : 'right'}" data-sign="${key}">
+      <div class="z-dot"></div>
+      <div class="z-line-range">${range}</div>
       <button class="z-head" type="button" onclick="toggleSign('${key}')">
         <div class="z-top">
           <div>
