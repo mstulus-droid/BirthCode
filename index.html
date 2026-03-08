@@ -594,12 +594,25 @@
     cursor: pointer;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
+  .card-zodiac {
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
   .card-generation:hover {
     transform: translateY(-2px);
     border-color: #d7d0c8;
     box-shadow: var(--shadow-lg);
   }
+  .card-zodiac:hover {
+    transform: translateY(-2px);
+    border-color: #d7d0c8;
+    box-shadow: var(--shadow-lg);
+  }
   .card-generation:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+  }
+  .card-zodiac:focus-visible {
     outline: 2px solid var(--accent1);
     outline-offset: 2px;
   }
@@ -632,12 +645,12 @@
   .gen-modal-sheet {
     position: relative;
     width: 100%;
-    max-width: 560px;
-    max-height: 86vh;
+    max-width: 1120px;
+    max-height: 94vh;
     background: var(--bg);
     border-radius: 24px 24px 0 0;
     box-shadow: var(--shadow-lg);
-    padding: 28px 18px 22px;
+    padding: 16px;
     overflow-y: auto;
     transform: translateY(100%);
     transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
@@ -657,54 +670,16 @@
     font-size: 20px;
     line-height: 1;
   }
-  .gen-modal-head {
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 0 24px;
-  }
-  .gen-modal-eyebrow {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .gen-modal-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 31px;
-    line-height: 1.12;
-    font-weight: 500;
-  }
-  .gen-modal-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 8px;
-  }
-  .gen-modal-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 12px;
-    flex-wrap: wrap;
-  }
-  .gen-modal-btn {
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    border-radius: 999px;
-    padding: 8px 14px;
-    font-size: 12px;
-    cursor: pointer;
-  }
   .gen-modal-frame-wrap {
     border: 1px solid var(--border);
     border-radius: 16px;
     overflow: hidden;
     background: var(--surface);
+    margin-top: 20px;
   }
   .gen-modal-frame {
     width: 100%;
-    height: min(72vh, 760px);
+    height: min(88vh, 900px);
     border: 0;
     display: block;
     background: var(--bg);
@@ -793,8 +768,8 @@
     }
     .gen-modal-sheet {
       border-radius: 20px;
-      max-height: 80vh;
-      padding: 30px 22px 24px;
+      max-height: 95vh;
+      padding: 16px;
       transform: scale(0.96);
     }
     .gen-modal.active .gen-modal-sheet { transform: scale(1); }
@@ -932,17 +907,8 @@
 </div>
 
 <div id="generationModal" class="gen-modal" aria-hidden="true">
-  <div class="gen-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="genModalTitle">
+  <div class="gen-modal-sheet" role="dialog" aria-modal="true" aria-label="Detail Generasi">
     <button class="gen-modal-close" type="button" aria-label="Tutup detail generasi" onclick="closeGenerationModal()">&times;</button>
-    <div class="gen-modal-head">
-      <div class="gen-modal-eyebrow" id="genModalEyebrow">Garis Waktu</div>
-      <div class="gen-modal-title" id="genModalTitle">Evolusi Generasi</div>
-      <div class="gen-modal-sub" id="genModalSub">Konten detail dibuka langsung dari gen.html.</div>
-      <div class="gen-modal-actions">
-        <button type="button" class="gen-modal-btn" id="genModalBackBtn" onclick="closeGenerationModal()">Kembali</button>
-        <button type="button" class="gen-modal-btn" id="genModalOpenPageBtn">Buka Halaman Penuh</button>
-      </div>
-    </div>
     <div class="gen-modal-frame-wrap">
       <iframe id="genModalFrame" class="gen-modal-frame" title="Detail Generasi"></iframe>
     </div>
@@ -1073,6 +1039,7 @@ const GENERASI=[
   {name:'Millennials',icon:'🧑‍💻',range:[1981,1996],traitsEn:'Digital natives, purpose-driven, collaborative',traitsId:'Native digital, berorientasi tujuan, kolaboratif',descId:'Akrab dengan internet sejak muda; menilai makna, kolaborasi, dan work-life balance sebagai prioritas.',descEn:'Grew up with the internet; values purpose, collaboration, and work-life balance.'},
   {name:'Generation Z',icon:'🧑‍🎤',range:[1997,2012],traitsEn:'True digital natives, diverse, pragmatic',traitsId:'Digital native sejati, beragam, pragmatis',descId:'Lahir di era media sosial; cepat belajar, inklusif, realistis, dan sadar isu sosial/global.',descEn:'Born into social platforms; fast-learning, inclusive, pragmatic, and socially aware.'},
   {name:'Generation Alpha',icon:'👶',range:[2013,2024],traitsEn:'Tech immersed, global, climate conscious',traitsId:'Sangat akrab teknologi, global, sadar iklim',descId:'Generasi dengan paparan teknologi paling awal; berpikir global, visual, dan peduli keberlanjutan.',descEn:'Most early-tech-exposed generation; globally minded, visual-first, and climate-aware.'},
+  {name:'Generation Beta',icon:'🔮',range:[2025,2039],traitsEn:'AI-native, immersive, empathy-led',traitsId:'AI-native, imersif, berbasis empati',descId:'Generasi setelah Alpha yang diproyeksikan tumbuh bersama AI tutor, metaverse, dan otomasi tinggi.',descEn:'Post-Alpha cohort expected to grow up with AI tutors, immersive tech, and high automation.'},
 ];
 
 const GENERATION_TIMELINE = [
@@ -1357,13 +1324,14 @@ function buildCards(year, month, day, date) {
     </div>`,
 
     // Zodiak
-    `<div class="card card-zodiac">
+    `<div class="card card-zodiac" role="button" tabindex="0" data-zodiac="${zodiac.name}">
       <div class="card-category">${lang.categories.zodiac}</div>
       <div class="card-icon">${zodiac.icon}</div>
       <div class="card-title">${zodiac.name}</div>
       <div class="card-subtitle">${localizeZodiacDateRange(zodiac.date)} · ${lang.labels.zodiacElement} ${localizeElementName(zodiac.element)}</div>
       <div class="card-desc">${localizeDesc('zodiac', zodiac.name, zodiac.desc)}</div>
       <div class="tags">${zodiacTraits.map(x=>`<span class="tag">${x}</span>`).join('')}</div>
+      <div class="gen-detail-link">${currentLang === 'en' ? 'Tap to view full zodiac details' : 'Ketuk untuk lihat detail lengkap zodiak'}</div>
     </div>`,
 
     // Shio & Elemen (full width on desktop)
@@ -1528,21 +1496,39 @@ function buildGenDetailUrl(birthYear, language) {
   return `gen.html?${params.toString()}`;
 }
 
-function openGenerationModal(generationName, birthYear) {
+function zodiacNameToKey(name) {
+  const n = String(name || '').toLowerCase();
+  const map = {
+    aries: 'aries',
+    taurus: 'taurus',
+    gemini: 'gemini',
+    cancer: 'cancer',
+    leo: 'leo',
+    virgo: 'virgo',
+    libra: 'libra',
+    scorpio: 'scorpio',
+    sagittarius: 'sagittarius',
+    capricorn: 'capricorn',
+    aquarius: 'aquarius',
+    pisces: 'pisces',
+  };
+  return map[n] || 'aries';
+}
+
+function buildZodiacDetailUrl(zodiacName, language) {
+  const params = new URLSearchParams();
+  params.set('sign', zodiacNameToKey(zodiacName));
+  params.set('lang', language || 'id');
+  params.set('embed', '1');
+  return `zodiac.html?${params.toString()}`;
+}
+
+function openGenerationModal(birthYear) {
   const modal = document.getElementById('generationModal');
   const frame = document.getElementById('genModalFrame');
   const modalUrl = buildGenDetailUrl(Number(birthYear), currentLang);
-  const pageUrl = modalUrl.replace('embed=1', 'embed=0');
-  const isEn = currentLang === 'en';
-
-  document.getElementById('genModalEyebrow').textContent = isEn ? 'Timeline' : 'Garis Waktu';
-  document.getElementById('genModalTitle').textContent = isEn ? `Generation: ${generationName || '-'}` : `Generasi: ${generationName || '-'}`;
-  document.getElementById('genModalSub').textContent = isEn
-    ? 'Loaded from gen.html. You can continue in full page mode.'
-    : 'Konten diambil utuh dari gen.html. Kamu bisa lanjut ke mode halaman penuh.';
 
   frame.src = modalUrl;
-  document.getElementById('genModalOpenPageBtn').onclick = () => window.open(pageUrl, '_self');
 
   modal.classList.add('active');
   modal.setAttribute('aria-hidden', 'false');
@@ -1558,6 +1544,15 @@ function closeGenerationModal() {
   document.body.style.overflow = '';
 }
 
+function openZodiacModal(zodiacName) {
+  const modal = document.getElementById('generationModal');
+  const frame = document.getElementById('genModalFrame');
+  frame.src = buildZodiacDetailUrl(zodiacName, currentLang);
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
 function setupGenerationCardActions() {
   ['m-cardsGrid', 'd-cardsGrid'].forEach((gridId) => {
     const grid = document.getElementById(gridId);
@@ -1566,7 +1561,7 @@ function setupGenerationCardActions() {
     grid.addEventListener('click', (e) => {
       const card = e.target.closest('.card-generation');
       if (!card) return;
-      openGenerationModal(card.dataset.generation || '', card.dataset.year || '');
+      openGenerationModal(card.dataset.year || '');
     });
 
     grid.addEventListener('keydown', (e) => {
@@ -1574,11 +1569,35 @@ function setupGenerationCardActions() {
       if (!card) return;
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        openGenerationModal(card.dataset.generation || '', card.dataset.year || '');
+        openGenerationModal(card.dataset.year || '');
       }
     });
 
     grid.dataset.genBound = '1';
+  });
+}
+
+function setupZodiacCardActions() {
+  ['m-cardsGrid', 'd-cardsGrid'].forEach((gridId) => {
+    const grid = document.getElementById(gridId);
+    if (!grid || grid.dataset.zodiacBound === '1') return;
+
+    grid.addEventListener('click', (e) => {
+      const card = e.target.closest('.card-zodiac');
+      if (!card) return;
+      openZodiacModal(card.dataset.zodiac || '');
+    });
+
+    grid.addEventListener('keydown', (e) => {
+      const card = e.target.closest('.card-zodiac');
+      if (!card) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openZodiacModal(card.dataset.zodiac || '');
+      }
+    });
+
+    grid.dataset.zodiacBound = '1';
   });
 }
 
@@ -1709,6 +1728,7 @@ function setLanguage(lang) {
 initWheelPickers();
 updateStaticTexts();
 setupGenerationCardActions();
+setupZodiacCardActions();
 
 document.getElementById('generationModal').addEventListener('click', function(e) {
   if (e.target === this) closeGenerationModal();
@@ -1725,3 +1745,4 @@ window.addEventListener('message', function(e) {
 </script>
 </body>
 </html>
+

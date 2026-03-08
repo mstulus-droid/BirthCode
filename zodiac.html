@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#FAF7F2">
+<title>BirthCode - Detail Zodiak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --surface: #FFFFFF;
+    --text: #1A1714;
+    --muted: #8A8480;
+    --border: #EDE9E3;
+    --accent1: #C4785A;
+    --shadow: 0 2px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.09);
+    --radius: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 23, 20, 0.45);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  .popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .popup-container {
+    width: 100%;
+    max-width: 1000px;
+    max-height: 90vh;
+    border-radius: var(--radius);
+    background: var(--bg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.97) translateY(12px);
+    transition: all 0.3s ease;
+  }
+  .popup-overlay.active .popup-container {
+    transform: scale(1) translateY(0);
+  }
+  .popup-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .popup-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+  }
+  .popup-sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .close-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .popup-content {
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .zodiac-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .z-item {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .z-item.active {
+    border-color: var(--accent1);
+  }
+  .z-head {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    padding: 16px 18px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .z-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .z-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .z-range {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  .z-element {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .z-facts {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.24s ease;
+  }
+  .z-item.active .z-facts {
+    grid-template-rows: 1fr;
+  }
+  .z-facts-inner {
+    overflow: hidden;
+  }
+  .z-facts-body {
+    padding: 0 18px 16px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .z-label {
+    color: var(--text);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--accent1);
+    border: 1px solid #e5d4cd;
+    background: #fff7f3;
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .trigger-btn {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    border: 0;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: var(--text);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+  }
+
+  body.embed-mode { background: transparent; }
+  body.embed-mode .trigger-btn { display: none; }
+  body.embed-mode .popup-overlay {
+    position: static;
+    display: block;
+    background: transparent;
+    backdrop-filter: none;
+    opacity: 1;
+    visibility: visible;
+    padding: 0;
+  }
+  body.embed-mode .popup-container {
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    background: transparent;
+  }
+  body.embed-mode .popup-header { display: none; }
+  body.embed-mode .popup-content { padding: 8px; }
+
+  @media (min-width: 900px) {
+    .zodiac-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .z-item.active { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+
+<button class="trigger-btn" onclick="openPopup()">Buka Detail Zodiak</button>
+
+<div class="popup-overlay" id="zodiacPopup">
+  <div class="popup-container">
+    <div class="popup-header">
+      <div>
+        <div class="popup-title" id="title">Detail Zodiak</div>
+        <div class="popup-sub" id="subtitle">Ketuk kartu untuk membuka karakteristik lengkap</div>
+      </div>
+      <button class="close-btn" onclick="closePopup()">×</button>
+    </div>
+    <div class="popup-content">
+      <div class="zodiac-grid" id="zodiacGrid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const isEmbed = params.get('embed') === '1';
+const lang = params.get('lang') === 'en' ? 'en' : 'id';
+const signParam = (params.get('sign') || '').toLowerCase();
+
+const UI = {
+  id: {
+    title: 'Detail Zodiak',
+    subtitle: 'Ketuk kartu untuk membuka karakteristik lengkap',
+    youAreHere: 'Kamu di sini',
+    traits: 'Karakteristik Detail',
+    stereotype: 'Fakta Stereotip'
+  },
+  en: {
+    title: 'Zodiac Details',
+    subtitle: 'Tap a card to expand full characteristics',
+    youAreHere: 'You are here',
+    traits: 'Detailed Characteristics',
+    stereotype: 'Stereotype Fact'
+  }
+};
+
+const ZODIAC_DATA = {
+  aries: {
+    icon: '♈', idName: 'Aries', enName: 'Aries', idRange: '21 Maret - 19 April', enRange: 'March 21 - April 19',
+    idElement: 'Api | Domba', enElement: 'Fire | Ram',
+    idTraits: 'Pemberani dan penuh semangat. Aries terlahir sebagai pemimpin yang gigih, penuh tekad, dan antusias menghadapi tantangan.',
+    enTraits: 'Brave and energetic. Aries are natural-born leaders who are decisive, passionate, and challenge-oriented.',
+    idStereo: 'Sering dianggap agresif. Faktanya, energi asertif Aries biasanya diarahkan untuk mendorong progres dan memotivasi orang lain.',
+    enStereo: 'Often stereotyped as aggressive. In reality, Aries uses assertive energy to push progress and uplift others.'
+  },
+  taurus: {
+    icon: '♉', idName: 'Taurus', enName: 'Taurus', idRange: '20 April - 20 Mei', enRange: 'April 20 - May 20',
+    idElement: 'Tanah | Banteng', enElement: 'Earth | Bull',
+    idTraits: 'Stabil dan pencinta kenyamanan. Taurus setia, sabar, andal, dan menghargai keamanan serta kualitas hidup.',
+    enTraits: 'Stable and comfort-loving. Taurus is loyal, patient, reliable, and values security and quality living.',
+    idStereo: 'Sering dicap pemalas. Kenyataannya Taurus sangat konsisten bekerja jika hasilnya memberi rasa aman jangka panjang.',
+    enStereo: 'Often labeled lazy. Actually Taurus is consistently hard-working, especially for long-term security.'
+  },
+  gemini: {
+    icon: '♊', idName: 'Gemini', enName: 'Gemini', idRange: '21 Mei - 20 Juni', enRange: 'May 21 - June 20',
+    idElement: 'Udara | Anak Kembar', enElement: 'Air | Twins',
+    idTraits: 'Cerdas dan komunikatif. Gemini adaptif, ingin tahu tinggi, dan cepat memahami banyak perspektif.',
+    enTraits: 'Clever and communicative. Gemini is highly adaptable, curious, and quick with multiple perspectives.',
+    idStereo: 'Sering dituduh bermuka dua. Sebenarnya ini bentuk fleksibilitas mental yang membuat Gemini dinamis.',
+    enStereo: 'Often called two-faced. In truth, this reflects mental flexibility and dynamic social adaptation.'
+  },
+  cancer: {
+    icon: '♋', idName: 'Cancer', enName: 'Cancer', idRange: '21 Juni - 22 Juli', enRange: 'June 21 - July 22',
+    idElement: 'Air | Kepiting', enElement: 'Water | Crab',
+    idTraits: 'Penuh kasih dan protektif. Cancer empatik, family-oriented, dan kuat dalam menjaga keamanan emosional.',
+    enTraits: 'Caring and protective. Cancer is empathetic, family-oriented, and deeply protective emotionally.',
+    idStereo: 'Sering disebut moody. Faktanya Cancer justru matang secara emosi dan peka terhadap perasaan orang lain.',
+    enStereo: 'Often seen as moody. In reality, Cancer is emotionally mature and highly sensitive to others.'
+  },
+  leo: {
+    icon: '♌', idName: 'Leo', enName: 'Leo', idRange: '23 Juli - 22 Agustus', enRange: 'July 23 - August 22',
+    idElement: 'Api | Singa', enElement: 'Fire | Lion',
+    idTraits: 'Karismatik dan percaya diri. Leo punya aura pemimpin, loyal, dan senang memberi energi positif.',
+    enTraits: 'Charismatic and confident. Leo carries natural leadership, loyalty, and uplifting presence.',
+    idStereo: 'Sering dicap egois. Nyatanya Leo cenderung murah hati dan ingin membuat orang di sekitarnya ikut bersinar.',
+    enStereo: 'Often called egocentric. Actually Leo is generous and often wants others to shine too.'
+  },
+  virgo: {
+    icon: '♍', idName: 'Virgo', enName: 'Virgo', idRange: '23 Agustus - 22 September', enRange: 'August 23 - September 22',
+    idElement: 'Tanah | Gadis', enElement: 'Earth | Maiden',
+    idTraits: 'Praktis dan teliti. Virgo analitis, terorganisir, dan unggul dalam detail serta perbaikan sistem.',
+    enTraits: 'Practical and detail-oriented. Virgo is analytical, organized, and system-improvement focused.',
+    idStereo: 'Dibilang perfeksionis berlebihan. Seringnya ini lahir dari niat Virgo untuk membantu secara konkret.',
+    enStereo: 'Seen as overly perfectionist. Usually this comes from Virgo’s intention to be useful and precise.'
+  },
+  libra: {
+    icon: '♎', idName: 'Libra', enName: 'Libra', idRange: '23 September - 22 Oktober', enRange: 'September 23 - October 22',
+    idElement: 'Udara | Timbangan', enElement: 'Air | Scales',
+    idTraits: 'Diplomatis dan pencari harmoni. Libra kuat dalam menimbang perspektif dan menjaga keseimbangan relasi.',
+    enTraits: 'Diplomatic and harmony-seeking. Libra is skilled at balancing perspectives and relationships.',
+    idStereo: 'Dianggap plin-plan. Faktanya Libra berhati-hati karena ingin mengambil keputusan paling adil.',
+    enStereo: 'Often called indecisive. In fact Libra is careful because fairness matters deeply.'
+  },
+  scorpio: {
+    icon: '♏', idName: 'Scorpio', enName: 'Scorpio', idRange: '23 Oktober - 21 November', enRange: 'October 23 - November 21',
+    idElement: 'Air | Kalajengking', enElement: 'Water | Scorpion',
+    idTraits: 'Intens dan intuitif. Scorpio punya kedalaman emosi tinggi, fokus kuat, dan loyalitas yang serius.',
+    enTraits: 'Intense and intuitive. Scorpio has deep emotional depth, focus, and serious loyalty.',
+    idStereo: 'Sering dianggap suka kontrol. Sebenarnya Scorpio hanya sangat selektif terhadap kepercayaan.',
+    enStereo: 'Often seen as controlling. Actually Scorpio is highly selective about trust and authenticity.'
+  },
+  sagittarius: {
+    icon: '♐', idName: 'Sagitarius', enName: 'Sagittarius', idRange: '22 November - 21 Desember', enRange: 'November 22 - December 21',
+    idElement: 'Api | Pemanah', enElement: 'Fire | Archer',
+    idTraits: 'Jiwa bebas dan petualang. Sagitarius optimis, mandiri, dan haus eksplorasi intelektual maupun pengalaman.',
+    enTraits: 'Free-spirited and adventurous. Sagittarius is optimistic, independent, and exploration-driven.',
+    idStereo: 'Dicap tidak konsisten. Faktanya Sagitarius hanya butuh ruang agar tetap tumbuh dan otentik.',
+    enStereo: 'Labeled inconsistent. In truth Sagittarius needs room to grow and remain authentic.'
+  },
+  capricorn: {
+    icon: '♑', idName: 'Capricorn', enName: 'Capricorn', idRange: '22 Desember - 19 Januari', enRange: 'December 22 - January 19',
+    idElement: 'Tanah | Kambing Gunung', enElement: 'Earth | Sea-Goat',
+    idTraits: 'Disiplin dan bertanggung jawab. Capricorn fokus pada tujuan jangka panjang dan eksekusi konsisten.',
+    enTraits: 'Disciplined and responsible. Capricorn is long-term goal focused with steady execution.',
+    idStereo: 'Sering dibilang terlalu kerja. Biasanya karena Capricorn menemukan makna lewat pencapaian.',
+    enStereo: 'Often seen as workaholic. Usually Capricorn finds meaning through progress and achievement.'
+  },
+  aquarius: {
+    icon: '♒', idName: 'Aquarius', enName: 'Aquarius', idRange: '20 Januari - 18 Februari', enRange: 'January 20 - February 18',
+    idElement: 'Udara | Pembawa Air', enElement: 'Air | Water Bearer',
+    idTraits: 'Inovatif dan kemanusiaan. Aquarius visioner, orisinal, dan tertarik pada ide yang melampaui zamannya.',
+    enTraits: 'Innovative and humanitarian. Aquarius is visionary, original, and ahead-of-its-time in ideas.',
+    idStereo: 'Sering dianggap dingin. Sebenarnya Aquarius peduli isu sosial, hanya mengekspresikan secara intelektual.',
+    enStereo: 'Often seen as detached. Actually Aquarius cares deeply about social impact, but expresses it intellectually.'
+  },
+  pisces: {
+    icon: '♓', idName: 'Pisces', enName: 'Pisces', idRange: '19 Februari - 20 Maret', enRange: 'February 19 - March 20',
+    idElement: 'Air | Ikan', enElement: 'Water | Fish',
+    idTraits: 'Imajinatif dan empatik. Pisces intuitif, kreatif, romantis, dan punya kedalaman belas kasih.',
+    enTraits: 'Imaginative and empathetic. Pisces is intuitive, creative, romantic, and deeply compassionate.',
+    idStereo: 'Dianggap terlalu melamun. Faktanya Pisces punya sensitivitas moral dan empati yang sangat tinggi.',
+    enStereo: 'Often seen as dreamy. In reality Pisces has strong moral sensitivity and profound empathy.'
+  }
+};
+
+function render() {
+  const ui = UI[lang];
+  document.documentElement.lang = lang;
+  document.getElementById('title').textContent = ui.title;
+  document.getElementById('subtitle').textContent = ui.subtitle;
+
+  const html = Object.entries(ZODIAC_DATA).map(([key, z]) => {
+    const name = lang === 'en' ? z.enName : z.idName;
+    const range = lang === 'en' ? z.enRange : z.idRange;
+    const element = lang === 'en' ? z.enElement : z.idElement;
+    const traits = lang === 'en' ? z.enTraits : z.idTraits;
+    const stereo = lang === 'en' ? z.enStereo : z.idStereo;
+    return `<div class="z-item" data-sign="${key}">
+      <button class="z-head" type="button" onclick="toggleSign('${key}')">
+        <div class="z-top">
+          <div>
+            <div class="z-title">${z.icon} ${name}</div>
+            <div class="z-range">${range}</div>
+            <div class="z-element">${element}</div>
+          </div>
+        </div>
+      </button>
+      <div class="z-facts"><div class="z-facts-inner"><div class="z-facts-body">
+        <div class="z-label">${ui.traits}</div>
+        <div>${traits}</div>
+        <div class="z-label">${ui.stereotype}</div>
+        <div>${stereo}</div>
+      </div></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('zodiacGrid').innerHTML = html;
+}
+
+function activateSign(signKey) {
+  const items = document.querySelectorAll('.z-item');
+  items.forEach((it) => it.classList.remove('active'));
+  const target = document.querySelector(`.z-item[data-sign="${signKey}"]`);
+  if (!target) return;
+  target.classList.add('active');
+  target.querySelectorAll('.badge').forEach((el) => el.remove());
+  const title = target.querySelector('.z-title');
+  if (title) {
+    const b = document.createElement('span');
+    b.className = 'badge';
+    b.textContent = UI[lang].youAreHere;
+    title.appendChild(b);
+  }
+  setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 90);
+}
+
+function toggleSign(key) {
+  const target = document.querySelector(`.z-item[data-sign="${key}"]`);
+  if (!target) return;
+  const isActive = target.classList.contains('active');
+  document.querySelectorAll('.z-item').forEach((it) => it.classList.remove('active'));
+  document.querySelectorAll('.badge').forEach((it) => it.remove());
+  if (!isActive) activateSign(key);
+}
+
+function openPopup() {
+  document.getElementById('zodiacPopup').classList.add('active');
+  if (!isEmbed) document.body.style.overflow = 'hidden';
+  activateSign(ZODIAC_DATA[signParam] ? signParam : 'aries');
+}
+
+function closePopup() {
+  if (isEmbed && window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'close-generation-modal' }, '*');
+    return;
+  }
+  document.getElementById('zodiacPopup').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+render();
+if (isEmbed) document.body.classList.add('embed-mode');
+if (!isEmbed) {
+  document.getElementById('zodiacPopup').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closePopup();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePopup();
+  });
+}
+openPopup();
+</script>
+</body>
+</html>

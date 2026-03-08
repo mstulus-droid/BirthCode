@@ -144,24 +144,7 @@
     color: white;
     transform: rotate(90deg);
   }
-  .back-btn {
-    height: 44px;
-    border-radius: 999px;
-    border: 1.5px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding: 0 14px;
-    margin-right: 8px;
-  }
-  .back-btn:hover {
-    background: var(--text);
-    color: white;
-  }
-
-  /* ═══════════════════════════════════════
+/* ═══════════════════════════════════════
      TIMELINE CONTENT
   ═══════════════════════════════════════ */
   .popup-content {
@@ -565,6 +548,37 @@
     background: #333;
   }
   body.embed-mode .trigger-btn { display: none; }
+  body.embed-mode {
+    background: transparent;
+  }
+  body.embed-mode .popup-overlay {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 0;
+    opacity: 1;
+    visibility: visible;
+    background: transparent;
+    backdrop-filter: none;
+    display: block;
+  }
+  body.embed-mode .popup-container {
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    background: transparent;
+  }
+  body.embed-mode .popup-header {
+    display: none;
+  }
+  body.embed-mode .popup-content {
+    padding: 10px 8px 18px;
+  }
+  body.embed-mode .timeline {
+    max-width: 1100px;
+  }
 </style>
 </head>
 <body>
@@ -585,10 +599,7 @@
           <div class="popup-subtitle">Dari Lost Generation hingga Generasi Beta</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;">
-        <button class="back-btn" id="backBtn" onclick="handleBack()">&larr; Kembali</button>
-        <button class="close-btn" onclick="closePopup()">✕</button>
-      </div>
+      <button class="close-btn" onclick="closePopup()">✕</button>
     </div>
 
     <!-- CONTENT -->
@@ -959,6 +970,7 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const isEmbed = params.get('embed') === '1';
+  const langParam = params.get('lang') === 'en' ? 'en' : 'id';
   const yearParam = Number(params.get('year'));
 
   const generationData = {
@@ -973,6 +985,135 @@
     beta: { name: 'Generation Beta', range: [2025, 2039] }
   };
 
+  const enCopy = {
+    headerTitle: 'Generation <em>Timeline</em>',
+    headerSubtitle: 'From the Lost Generation to Generation Beta',
+    intro: '"Each generation carries unique traits, challenges, and strengths that shape how they see the world."',
+    expand: 'Tap for details ↓',
+    contextLabel: 'Historical Context',
+    detailLabel: 'Detailed Characteristics',
+    badge: 'You are here',
+    items: {
+      lost: {
+        year: '± 1883 - 1900',
+        name: 'Lost Generation',
+        traits: ['Mental Trauma', 'Search for Stability', 'Art Expression'],
+        desc: 'Grew up around World War I and often experienced deep trauma and value disorientation.',
+        context: 'World War I triggered major social disruption and a loss of confidence in old institutions.',
+        details: '• <span class="detail-highlight">Mental Trauma</span>: severe psychological burden due to war violence<br>• <span class="detail-highlight">Search for Stability</span>: strong need for certainty in unstable times<br>• <span class="detail-highlight">Art as Escape</span>: powerful literary and artistic expression as coping'
+      },
+      greatest: {
+        year: '± 1901 - 1927',
+        name: 'Greatest Generation',
+        traits: ['Resilience', 'Discipline', 'Patriotism'],
+        desc: 'Came of age during the Great Depression and became central forces in World War II.',
+        context: 'Faced severe economic collapse and global war, demanding collective sacrifice.',
+        details: '• <span class="detail-highlight">Resilience & Discipline</span>: strong work ethic and duty mindset<br>• <span class="detail-highlight">Sacrifice</span>: family, community, and country before self<br>• <span class="detail-highlight">Patriotism</span>: national responsibility as a core value'
+      },
+      silent: {
+        year: '1928 - 1945',
+        name: 'Silent Generation',
+        traits: ['Conformist', 'Rule-Abiding', 'Stability'],
+        desc: 'Raised through depression, war, and early Cold War tension with a cautious social style.',
+        context: 'Transition period from wartime survival toward order and institutional stability.',
+        details: '• <span class="detail-highlight">Conformist</span>: conflict-avoidant and careful in public expression<br>• <span class="detail-highlight">Career Stability</span>: loyalty and long tenure were highly valued<br>• <span class="detail-highlight">Traditional Family</span>: strong emphasis on family norms'
+      },
+      boomers: {
+        year: '1946 - 1964',
+        name: 'Baby Boomers',
+        traits: ['Ambitious', 'Optimistic', 'Work-Centric'],
+        desc: 'Born in post-war population boom and rapid economic growth; career and hierarchy focused.',
+        context: 'Prosperity era after World War II with rising consumer culture.',
+        details: '• <span class="detail-highlight">Career-Oriented</span>: live-to-work mindset and strong ambition<br>• <span class="detail-highlight">Hierarchy Respect</span>: authority and seniority mattered<br>• <span class="detail-highlight">Social Change</span>: active in major civil and cultural movements'
+      },
+      x: {
+        year: '1965 - 1980',
+        name: 'Generation X',
+        traits: ['Independent', 'Skeptical', 'Work-Life Balance'],
+        desc: 'A bridge generation from analog to digital, known for independence and pragmatism.',
+        context: 'Rising divorce rates and dual-working parents shaped self-reliance.',
+        details: '• <span class="detail-highlight">Independent & Skeptical</span>: less trust in institutions<br>• <span class="detail-highlight">Tech Bridge</span>: witnessed early PC and media revolution<br>• <span class="detail-highlight">Work-Life Balance</span>: work-to-live orientation'
+      },
+      millennials: {
+        year: '1981 - 1996',
+        name: 'Millennials',
+        traits: ['Tech-Savvy', 'Purpose-Driven', 'Collaborative'],
+        desc: 'Entered adulthood in the internet era and prioritized meaning, flexibility, and experiences.',
+        context: 'Grew up with early internet, globalization, and social media emergence.',
+        details: '• <span class="detail-highlight">Tech-Savvy</span>: fluent in digital communication tools<br>• <span class="detail-highlight">Priority Shift</span>: experiences over material ownership<br>• <span class="detail-highlight">Flexibility</span>: prefers flatter teams and meaningful work'
+      },
+      z: {
+        year: '1997 - 2012',
+        name: 'Generation Z',
+        traits: ['Digital Native', 'Realistic', 'Activist'],
+        desc: 'Fully raised in smartphone and social-platform culture, practical yet socially outspoken.',
+        context: 'Shaped by fast internet, economic uncertainty, and climate concerns.',
+        details: '• <span class="detail-highlight">True Digital Native</span>: high-speed, multi-platform habits<br>• <span class="detail-highlight">Realistic</span>: practical financial outlook and mental-health awareness<br>• <span class="detail-highlight">Social Activism</span>: vocal on justice, equality, and environment'
+      },
+      alpha: {
+        year: '2010 - 2024',
+        name: 'Generation Alpha',
+        traits: ['Generation Glass', 'Visual Learner', 'Global'],
+        desc: 'First fully 21st-century generation with very early exposure to screens and AI tools.',
+        context: 'Born when AI assistants and always-connected devices became mainstream.',
+        details: '• <span class="detail-highlight">Generation Glass</span>: screen-mediated interaction from early childhood<br>• <span class="detail-highlight">Visual Learning</span>: strong preference for visual and interactive learning<br>• <span class="detail-highlight">Education Shift</span>: expected to be highly educated and digitally fluent'
+      },
+      beta: {
+        year: '2025 - 2039',
+        name: 'Generation Beta',
+        traits: ['AI Native', 'Metaverse', 'Empathy-Led'],
+        desc: 'Upcoming cohort likely growing with AI tutors, immersive spaces, and heavy automation.',
+        context: 'Emerges in a world of mature AI systems, micro-computing, and virtual ecosystems.',
+        details: '• <span class="detail-highlight">AI & Metaverse Life</span>: everyday integration of AI and immersive environments<br>• <span class="detail-highlight">Instant Gratification Risk</span>: high-exposure digital behavior patterns<br>• <span class="detail-highlight">Empathy-Creativity Careers</span>: human skills become stronger differentiators'
+      }
+    }
+  };
+
+  function applyLanguage(lang) {
+    document.documentElement.lang = lang;
+    if (lang !== 'en') return;
+
+    const titleEl = document.querySelector('.popup-title');
+    const subtitleEl = document.querySelector('.popup-subtitle');
+    const introEl = document.querySelector('.timeline-intro h2');
+    if (titleEl) titleEl.innerHTML = enCopy.headerTitle;
+    if (subtitleEl) subtitleEl.textContent = enCopy.headerSubtitle;
+    if (introEl) introEl.textContent = enCopy.intro;
+
+    Object.entries(enCopy.items).forEach(([key, copy]) => {
+      const item = document.querySelector(`.timeline-item[data-gen="${key}"]`);
+      if (!item) return;
+
+      const yearEl = item.querySelector('.timeline-year');
+      const nameEl = item.querySelector('.gen-name');
+      const rangeEl = item.querySelector('.gen-range');
+      const traitEls = item.querySelectorAll('.gen-trait');
+      const descEl = item.querySelector('.gen-desc');
+      const hintEl = item.querySelector('.expand-hint');
+      const sectionEls = item.querySelectorAll('.detail-section');
+
+      if (yearEl) yearEl.textContent = copy.year;
+      if (nameEl) nameEl.textContent = copy.name;
+      if (rangeEl) rangeEl.textContent = copy.year;
+      traitEls.forEach((traitEl, idx) => { if (copy.traits[idx]) traitEl.textContent = copy.traits[idx]; });
+      if (descEl) descEl.textContent = copy.desc;
+      if (hintEl) hintEl.textContent = enCopy.expand;
+
+      if (sectionEls[0]) {
+        const label0 = sectionEls[0].querySelector('.detail-label');
+        const text0 = sectionEls[0].querySelector('.detail-text');
+        if (label0) label0.textContent = enCopy.contextLabel;
+        if (text0) text0.textContent = copy.context;
+      }
+      if (sectionEls[1]) {
+        const label1 = sectionEls[1].querySelector('.detail-label');
+        const text1 = sectionEls[1].querySelector('.detail-text');
+        if (label1) label1.textContent = enCopy.detailLabel;
+        if (text1) text1.innerHTML = copy.details;
+      }
+    });
+  }
+
   function findGenerationKeyByYear(year) {
     for (const [key, data] of Object.entries(generationData)) {
       if (year >= data.range[0] && year <= data.range[1]) return key;
@@ -984,7 +1125,16 @@
     const target = document.querySelector(`[data-gen="${key}"]`);
     if (!target) return;
     document.querySelectorAll('.timeline-item.active').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.current-badge').forEach(el => el.remove());
     target.classList.add('active');
+    const genNameEl = target.querySelector('.gen-name');
+    if (genNameEl) {
+      const badge = document.createElement('span');
+      badge.className = 'current-badge';
+      badge.textContent = langParam === 'en' ? enCopy.badge : 'Kamu di sini';
+      genNameEl.append(' ');
+      genNameEl.appendChild(badge);
+    }
     setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
   }
 
@@ -996,13 +1146,24 @@
     });
     item.classList.toggle('active', !isActive);
     if (!isActive) {
+      document.querySelectorAll('.current-badge').forEach(el => el.remove());
+      const genNameEl = item.querySelector('.gen-name');
+      if (genNameEl) {
+        const badge = document.createElement('span');
+        badge.className = 'current-badge';
+        badge.textContent = langParam === 'en' ? enCopy.badge : 'Kamu di sini';
+        genNameEl.append(' ');
+        genNameEl.appendChild(badge);
+      }
       setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    } else {
+      document.querySelectorAll('.current-badge').forEach(el => el.remove());
     }
   }
 
   function openPopup(key = 'millennials') {
     document.getElementById('generationPopup').classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (!isEmbed) document.body.style.overflow = 'hidden';
     activateGeneration(key);
   }
 
@@ -1015,27 +1176,17 @@
     document.body.style.overflow = '';
     document.querySelectorAll('.timeline-item.active').forEach(el => el.classList.remove('active'));
   }
+  if (!isEmbed) {
+    document.getElementById('generationPopup').addEventListener('click', function(e) {
+      if (e.target === this) closePopup();
+    });
 
-  function handleBack() {
-    if (isEmbed && window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: 'close-generation-modal' }, '*');
-      return;
-    }
-    if (window.history.length > 1) {
-      window.history.back();
-      return;
-    }
-    window.location.href = 'index.html';
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closePopup();
+    });
   }
 
-  document.getElementById('generationPopup').addEventListener('click', function(e) {
-    if (e.target === this) closePopup();
-  });
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closePopup();
-  });
-
+  applyLanguage(langParam);
   if (isEmbed) document.body.classList.add('embed-mode');
   const initialKey = Number.isFinite(yearParam) ? findGenerationKeyByYear(yearParam) : 'millennials';
   openPopup(initialKey);
@@ -1043,4 +1194,8 @@
 
 </body>
 </html>
+
+
+
+
 
